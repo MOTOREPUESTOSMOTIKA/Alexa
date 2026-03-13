@@ -1,13 +1,13 @@
 {
   "name": "Sistema Motika",
-  "short_name": "📲CONTROL",
+  "short_name": "Motika",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4A90E2",
   "icons": [
     {
-      "src": "https://images.search.yahoo.com/images/view;_ylt=AwrihO0LgLRpdpEWVW6InIlQ;_ylu=c2VjA3NyBHNsawNpbWcEb2lkAzJmN2RmYWYzNTUzNjAwNDBjODQwNjY0NDA1NDk2NDg5BGdwb3MDMTcEaXQDYmluZw--?back=https%3A%2F%2Fimages.search.yahoo.com%2Fsearch%2Fimages%3Fp%3Dicono%2Bde%2Btienda%26fr%3Diphone%26fr2%3Dpiv-web%26_tsrc%3Dapple%26tab%3Dorganic%26ri%3D17&w=512&h=512&imgurl=cdn-icons-png.flaticon.com%2F512%2F5086%2F5086863.png&rurl=https%3A%2F%2Fwww.flaticon.es%2Ficono-gratis%2Ftienda_5086863&size=8KB&p=icono+de+tienda&oid=2f7dfaf355360040c840664405496489&fr2=piv-web&fr=iphone&tt=Tienda+-+Iconos+gratis+de+comercio&b=0&ni=21&no=17&ts=&tab=organic&sigr=p12xzxKh.QmP&sigb=psbh8guACNK9&sigi=Pz7QEn0u2axo&sigt=EOIQHBKEMHJj&.crumb=o4IYfZfZkXh&fr=iphone&fr2=piv-web&_tsrc=apple",
+      "src": "https://cdn-icons-png.flaticon.com/512/3081/3081840.png",
       "sizes": "512x512",
       "type": "image/png"
     }
