@@ -34,9 +34,7 @@
 
 <main>
 
-<!-- ========================= -->
 <!-- DASHBOARD -->
-<!-- ========================= -->
 
 <section id="dashboard" class="active">
 
@@ -78,9 +76,7 @@
 
 </section>
 
-<!-- ========================= -->
 <!-- INVENTARIO -->
-<!-- ========================= -->
 
 <section id="inventario">
 
@@ -89,7 +85,6 @@
 <table>
 
 <thead>
-
 <tr>
 <th>Producto</th>
 <th>Stock</th>
@@ -97,7 +92,6 @@
 <th>Precio</th>
 <th>Acciones</th>
 </tr>
-
 </thead>
 
 <tbody id="tabla-inventario"></tbody>
@@ -106,9 +100,7 @@
 
 </section>
 
-<!-- ========================= -->
 <!-- COMPRAS -->
-<!-- ========================= -->
 
 <section id="compras">
 
@@ -134,16 +126,14 @@
 
 </section>
 
-<!-- ========================= -->
 <!-- VENTAS -->
-<!-- ========================= -->
 
 <section id="ventas">
 
 <h2>Registrar venta</h2>
 
 <input 
-id="buscar-producto" 
+id="buscar-producto"
 placeholder="Buscar producto"
 onkeyup="buscarProductos(this.value)"
 >
@@ -165,9 +155,7 @@ required
 
 </section>
 
-<!-- ========================= -->
 <!-- PEDIDOS -->
-<!-- ========================= -->
 
 <section id="pedidos">
 
@@ -210,9 +198,7 @@ Guardar pedido
 
 </section>
 
-<!-- ========================= -->
 <!-- PREPARAR PEDIDOS -->
-<!-- ========================= -->
 
 <section id="preparar">
 
@@ -222,9 +208,7 @@ Guardar pedido
 
 </section>
 
-<!-- ========================= -->
 <!-- DEUDAS -->
-<!-- ========================= -->
 
 <section id="deudas">
 
@@ -232,17 +216,9 @@ Guardar pedido
 
 <form id="form-deuda">
 
-<input 
-id="deuda-cliente"
-placeholder="Cliente"
-required
->
+<input id="deuda-cliente" placeholder="Cliente" required>
 
-<input 
-id="deuda-monto"
-placeholder="Monto"
-required
->
+<input id="deuda-monto" placeholder="Monto" required>
 
 <button type="submit">
 Registrar deuda
@@ -253,13 +229,11 @@ Registrar deuda
 <table>
 
 <thead>
-
 <tr>
 <th>Cliente</th>
 <th>Deuda</th>
 <th>Acción</th>
 </tr>
-
 </thead>
 
 <tbody id="tabla-deudas"></tbody>
@@ -270,9 +244,7 @@ Registrar deuda
 
 </main>
 
-<!-- ========================= -->
 <!-- FIREBASE -->
-<!-- ========================= -->
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 
@@ -299,6 +271,93 @@ const db = firebase.database();
 </script>
 
 <script src="script.js"></script>
+
+<script>
+
+/* =========================
+FORMULARIO COMPRA
+========================= */
+
+document.getElementById("form-compra").addEventListener("submit",function(e){
+
+e.preventDefault();
+
+registrarCompra(
+document.getElementById("compra-nombre").value,
+document.getElementById("compra-cantidad").value,
+document.getElementById("compra-costo").value,
+document.getElementById("compra-precio").value
+);
+
+this.reset();
+
+});
+
+/* =========================
+SISTEMA DE PEDIDOS
+========================= */
+
+let productosPedido = [];
+
+function agregarProductoPedido(){
+
+const nombre =
+document.getElementById("pedido-producto").value;
+
+const cantidad =
+document.getElementById("pedido-cantidad").value;
+
+if(!nombre || !cantidad){
+alert("Ingrese producto y cantidad");
+return;
+}
+
+productosPedido.push({
+nombre:nombre,
+cantidad:parseInt(cantidad)
+});
+
+renderProductosPedido();
+
+document.getElementById("pedido-producto").value="";
+document.getElementById("pedido-cantidad").value="";
+
+}
+
+function renderProductosPedido(){
+
+const cont = document.getElementById("productos-pedido");
+
+cont.innerHTML = productosPedido.map(p=>`
+
+<div>
+
+${p.nombre} (${p.cantidad})
+
+</div>
+
+`).join("");
+
+}
+
+document.getElementById("form-pedido").addEventListener("submit",function(e){
+
+e.preventDefault();
+
+const cliente =
+document.getElementById("pedido-cliente").value;
+
+crearPedido(cliente,productosPedido);
+
+productosPedido = [];
+
+renderProductosPedido();
+
+this.reset();
+
+});
+
+</script>
 
 </body>
 </html>
