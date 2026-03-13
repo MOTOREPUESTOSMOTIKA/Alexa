@@ -272,7 +272,6 @@ ELIMINAR PRODUCTO
 
 window.eliminarProducto = function(id){
   
-  productos = productos.filter(p=>Number(p.id)!==Number(id));
 
  if(!confirm("Eliminar producto")) return;
 
