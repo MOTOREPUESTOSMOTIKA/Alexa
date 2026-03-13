@@ -60,6 +60,8 @@ console.log("Datos recibidos:", snap.val());
   pedidos = data.pedidos || [];
   deudas = data.deudas || [];
   historialReportes = data.historialReportes || [];
+  
+console.log("Productos cargados:", productos);
 
   renderTodo();
 
@@ -229,8 +231,8 @@ EDITAR PRECIO
 ========================= */
 
 window.editarPrecio = function(id){
-
- const p = productos.find(x=>x.id===id);
+  
+const p = productos.find(x=>Number(x.id)===Number(id));
 
  if(!p) return;
 
@@ -250,7 +252,7 @@ EDITAR STOCK
 
 window.editarStock = function(id){
 
- const p = productos.find(x=>x.id===id);
+ const p = productos.find(x=>Number(x.id)===Number(id));
 
  if(!p) return;
 
@@ -269,6 +271,8 @@ ELIMINAR PRODUCTO
 ========================= */
 
 window.eliminarProducto = function(id){
+  
+  productos = productos.filter(p=>Number(p.id)!==Number(id));
 
  if(!confirm("Eliminar producto")) return;
 
@@ -353,7 +357,7 @@ window.venderProducto = function(id,cantidad){
 
  cantidad = parseInt(cantidad);
 
- const p = productos.find(x=>x.id==id);
+ const p = productos.find(x=>Number(x.id)===Number(id));
 
  if(!p) return alert("Producto no existe");
 
