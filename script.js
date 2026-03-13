@@ -49,7 +49,9 @@ function iniciarFirebase(){
  console.log("Firebase conectado");
 
  db.ref("motika_data").on("value", snap=>{
-
+  
+console.log("Datos recibidos:", snap.val());
+  
   const data = snap.val() || {};
 
   productos = data.productos || [];
