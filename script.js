@@ -845,3 +845,14 @@ function showSection(id){
  if(s) s.classList.add("active");
 
 }
+const btnOscuro = document.getElementById("modo-oscuro");
+
+if(btnOscuro){
+
+btnOscuro.onclick = function(){
+
+document.body.classList.toggle("dark");
+
+};
+
+}
