@@ -891,3 +891,64 @@ if(localStorage.getItem("modoOscuro") === "activo"){
 document.body.classList.add("dark");
 }
 
+/* =========================
+MODO ADMIN OCULTO
+========================= */
+
+let contadorToques = 0;
+
+const logo = document.getElementById("logo-motika");
+const botonReset = document.getElementById("reset-sistema");
+
+if(logo){
+
+logo.addEventListener("click",()=>{
+
+contadorToques++;
+
+if(contadorToques >= 5){
+
+alert("Modo administrador activado");
+
+botonReset.style.display = "block";
+
+}
+
+setTimeout(()=>{
+
+contadorToques = 0;
+
+},2000);
+
+});
+
+}
+
+/* =========================
+RESET SISTEMA
+========================= */
+
+if(botonReset){
+
+botonReset.onclick = function(){
+
+if(!confirm("⚠️ Se borrará TODO el sistema. ¿Continuar?")) return;
+
+db.ref("motika_data").remove().then(()=>{
+
+productos = [];
+transacciones = [];
+compras = [];
+pedidos = [];
+deudas = [];
+historialReportes = [];
+
+renderTodo();
+
+alert("Sistema reiniciado");
+
+});
+
+};
+
+}
