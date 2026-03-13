@@ -864,6 +864,12 @@ btnOscuro.onclick = function(){
 
 document.body.classList.toggle("dark");
 
+if(document.body.classList.contains("dark")){
+localStorage.setItem("modoOscuro","activo");
+}else{
+localStorage.setItem("modoOscuro","inactivo");
+}
+
 };
 
 }
@@ -876,5 +882,12 @@ console.log("Service Worker activo");
 
 });
 
+}
+/* =========================
+CARGAR MODO OSCURO
+========================= */
+
+if(localStorage.getItem("modoOscuro") === "activo"){
+document.body.classList.add("dark");
 }
 
