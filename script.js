@@ -365,3 +365,27 @@ function setTexto(id,valor){
 
  el.innerText = "$" + formatearNumero(valor);
 }
+/* =========================
+NAVEGACION
+========================= */
+
+function showSection(id){
+
+ document.querySelectorAll("section").forEach(sec=>{
+  sec.classList.remove("active");
+ });
+
+ const seccion = document.getElementById(id);
+ if(seccion) seccion.classList.add("active");
+
+}
+
+function toggleMenu(){
+
+ const sidebar = document.getElementById("sidebar");
+
+ if(sidebar){
+  sidebar.classList.toggle("active");
+ }
+
+}
