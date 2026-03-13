@@ -1,4 +1,4 @@
-console.log("Sistema MOTIKA V3 Profesional");
+console.log("Sistema MOTIKA V4 Profesional");
 
 /* =========================
 ESTADO GLOBAL
@@ -6,8 +6,9 @@ ESTADO GLOBAL
 
 let productos = [];
 let transacciones = [];
-let encargos = [];
 let compras = [];
+let pedidos = [];
+let deudas = [];
 let historialReportes = [];
 
 /* =========================
@@ -28,16 +29,19 @@ SINCRONIZACION FIREBASE
 ========================= */
 
 db.ref("motika_data").on("value", snap=>{
+
  const data = snap.val();
  if(!data) return;
 
  productos = data.productos || [];
  transacciones = data.transacciones || [];
- encargos = data.encargos || [];
  compras = data.compras || [];
+ pedidos = data.pedidos || [];
+ deudas = data.deudas || [];
  historialReportes = data.historialReportes || [];
 
  renderTodo();
+
 });
 
 function actualizarTodo(){
@@ -45,8 +49,9 @@ function actualizarTodo(){
  db.ref("motika_data").set({
   productos,
   transacciones,
-  encargos,
   compras,
+  pedidos,
+  deudas,
   historialReportes
  });
 
@@ -63,8 +68,8 @@ function calcularEfectivo(){
  let gastos = 0;
 
  transacciones.forEach(t=>{
-  if(t.tipo === "ingreso") ingresos += t.monto;
-  if(t.tipo === "gasto") gastos += t.monto;
+  if(t.tipo==="ingreso") ingresos += t.monto;
+  if(t.tipo==="gasto") gastos += t.monto;
  });
 
  return ingresos - gastos;
@@ -88,8 +93,8 @@ function calcularInventarioVenta(){
 
 function calcularDeudas(){
 
- return encargos.reduce((acc,e)=>{
-  return acc + (e.deuda || 0);
+ return deudas.reduce((acc,d)=>{
+  return acc + d.monto;
  },0);
 
 }
@@ -97,12 +102,12 @@ function calcularDeudas(){
 function calcularGanancia(){
 
  let ventas = 0;
- let costoVentas = 0;
+ let costo = 0;
 
  transacciones.forEach(t=>{
-  if(t.tipo === "venta"){
+  if(t.tipo==="venta"){
    ventas += t.monto;
-   costoVentas += t.costo || 0;
+   costo += t.costo || 0;
   }
  });
 
@@ -110,16 +115,16 @@ function calcularGanancia(){
  .filter(t=>t.tipo==="gasto")
  .reduce((acc,g)=>acc + g.monto,0);
 
- return ventas - costoVentas - gastos;
+ return ventas - costo - gastos;
 }
 
 function calcularPatrimonio(){
 
  const efectivo = calcularEfectivo();
  const inventario = calcularInventarioCosto();
- const deudas = calcularDeudas();
+ const deuda = calcularDeudas();
 
- return efectivo + inventario + deudas;
+ return efectivo + inventario + deuda;
 }
 
 /* =========================
@@ -128,22 +133,14 @@ DASHBOARD
 
 function renderDashboard(){
 
- const efectivo = calcularEfectivo();
- const inventarioCosto = calcularInventarioCosto();
- const inventarioVenta = calcularInventarioVenta();
- const deudas = calcularDeudas();
- const patrimonio = calcularPatrimonio();
- const ganancia = calcularGanancia();
-
- setTexto("dash-efectivo", efectivo);
- setTexto("dash-inv-costo", inventarioCosto);
- setTexto("dash-inv-venta", inventarioVenta);
- setTexto("dash-deudas", deudas);
- setTexto("dash-patrimonio", patrimonio);
- setTexto("dash-ganancia", ganancia);
+ setTexto("dash-efectivo",calcularEfectivo());
+ setTexto("dash-inv-costo",calcularInventarioCosto());
+ setTexto("dash-inv-venta",calcularInventarioVenta());
+ setTexto("dash-deudas",calcularDeudas());
+ setTexto("dash-ganancia",calcularGanancia());
+ setTexto("dash-patrimonio",calcularPatrimonio());
 
 }
-
 /* =========================
 INVENTARIO
 ========================= */
@@ -155,49 +152,53 @@ function renderInventario(){
 
  tabla.innerHTML = productos.map(p=>{
 
- const stockBajo = p.cantidad <= 3 ? "⚠️" : "";
+ const alerta = p.cantidad<=3 ? "⚠️" : "";
 
  return `
  <tr>
+
  <td>${p.nombre}</td>
- <td>${p.cantidad} ${stockBajo}</td>
+ <td>${p.cantidad} ${alerta}</td>
  <td>$${formatearNumero(p.costo)}</td>
  <td>$${formatearNumero(p.precio)}</td>
 
  <td>
- <button onclick="editarPrecio(${p.id})">💰</button>
- <button onclick="editarStock(${p.id})">✏️</button>
- <button onclick="eliminarProducto(${p.id})">❌</button>
- </td>
- </tr>
 
+ <button onclick="editarPrecio(${p.id})">Precio</button>
+ <button onclick="editarStock(${p.id})">Stock</button>
+ <button onclick="eliminarProducto(${p.id})">Eliminar</button>
+
+ </td>
+
+ </tr>
  `;
 
  }).join("");
 
 }
 
-window.editarStock = function(id){
-
- const p = productos.find(x=>x.id===id);
- const nuevo = prompt("Nuevo stock:",p.cantidad);
-
- if(nuevo===null) return;
-
- p.cantidad = parseInt(nuevo) || 0;
-
- actualizarTodo();
-}
-
 window.editarPrecio = function(id){
 
  const p = productos.find(x=>x.id===id);
 
- const nuevo = prompt("Nuevo precio venta:",p.precio);
+ const nuevo = prompt("Nuevo precio venta",p.precio);
 
  if(nuevo===null) return;
 
  p.precio = limpiarNumero(nuevo);
+
+ actualizarTodo();
+}
+
+window.editarStock = function(id){
+
+ const p = productos.find(x=>x.id===id);
+
+ const nuevo = prompt("Nuevo stock",p.cantidad);
+
+ if(nuevo===null) return;
+
+ p.cantidad = parseInt(nuevo)||0;
 
  actualizarTodo();
 }
@@ -212,47 +213,49 @@ window.eliminarProducto = function(id){
 }
 
 /* =========================
-COMPRAS MERCANCIA
+REGISTRAR COMPRA
 ========================= */
 
-window.registrarCompra = function(nombre,cantidad,costo){
+window.registrarCompra = function(nombre,cantidad,costo,precioVenta){
 
  const total = cantidad * costo;
 
- const productoExistente = productos.find(p=>p.nombre.toLowerCase()===nombre.toLowerCase());
+ let producto = productos.find(p=>p.nombre.toLowerCase()===nombre.toLowerCase());
 
- if(productoExistente){
+ if(producto){
 
- productoExistente.cantidad += cantidad;
- productoExistente.costo = costo;
+ producto.cantidad += cantidad;
+ producto.costo = costo;
+ producto.precio = precioVenta;
 
  }else{
 
  productos.push({
- id: Date.now(),
- nombre,
- cantidad,
- costo,
- precio: costo * 1.3
+  id: Date.now(),
+  nombre,
+  cantidad,
+  costo,
+  precio:precioVenta
  });
 
  }
 
  compras.push({
- id: Date.now(),
- nombre,
- cantidad,
- costo,
- total,
- fecha: new Date().toLocaleDateString()
+  id:Date.now(),
+  nombre,
+  cantidad,
+  costo,
+  precioVenta,
+  total,
+  fecha:new Date().toLocaleDateString()
  });
 
  transacciones.push({
- id: Date.now()+1,
- tipo:"gasto",
- desc:"Compra mercancía",
- monto: total,
- fecha: new Date().toLocaleDateString()
+  id:Date.now()+1,
+  tipo:"gasto",
+  desc:"Compra mercancía",
+  monto:total,
+  fecha:new Date().toLocaleDateString()
  });
 
  actualizarTodo();
@@ -262,9 +265,9 @@ window.registrarCompra = function(nombre,cantidad,costo){
 VENTAS
 ========================= */
 
-window.venderProducto = function(productoId,cantidad){
+window.venderProducto = function(id,cantidad){
 
- const p = productos.find(x=>x.id==productoId);
+ const p = productos.find(x=>x.id==id);
 
  if(!p) return alert("Producto no existe");
 
@@ -276,71 +279,104 @@ window.venderProducto = function(productoId,cantidad){
  const costo = p.costo * cantidad;
 
  transacciones.push({
- id: Date.now(),
- tipo:"venta",
- desc:`Venta ${p.nombre}`,
- monto,
- costo,
- fecha:new Date().toLocaleDateString()
+
+  id:Date.now(),
+  tipo:"venta",
+  desc:p.nombre,
+  monto,
+  costo,
+  fecha:new Date().toLocaleDateString()
+
+ });
+
+ actualizarTodo();
+}
+/* =========================
+PEDIDOS
+========================= */
+
+window.crearPedido = function(cliente,productosPedido){
+
+ pedidos.push({
+  id:Date.now(),
+  cliente,
+  productos:productosPedido
  });
 
  actualizarTodo();
 }
 
 /* =========================
-BUSQUEDA PRODUCTOS
+LISTA DE COMPRAS
 ========================= */
 
-window.buscarProductos = function(texto){
+function generarListaCompras(){
 
- const lista = document.getElementById("lista-sugerencias");
- if(!lista) return;
+ let lista = {};
 
- lista.innerHTML="";
+ pedidos.forEach(p=>{
 
- if(texto.length < 1) return;
+  p.productos.forEach(prod=>{
 
- productos
- .filter(p=>p.nombre.toLowerCase().includes(texto.toLowerCase()))
- .forEach(p=>{
+   if(!lista[prod.nombre]){
 
- const div = document.createElement("div");
+    lista[prod.nombre] = 0;
 
- div.innerText = `${p.nombre} ($${p.precio})`;
+   }
 
- div.onclick = ()=>{
- seleccionarProducto(p.id);
- };
+   lista[prod.nombre] += prod.cantidad;
 
- lista.appendChild(div);
+  });
 
  });
 
+ return lista;
 }
 
 /* =========================
 DEUDAS
 ========================= */
 
-window.abonarDeuda = function(id,monto){
+window.registrarDeuda = function(cliente,monto){
 
- const e = encargos.find(x=>x.id===id);
+ deudas.push({
 
- if(!e) return;
+  id:Date.now(),
+  cliente,
+  monto
 
- if(monto > e.deuda) return alert("Monto mayor a deuda");
-
- e.deuda -= monto;
-
- transacciones.push({
- id: Date.now(),
- tipo:"ingreso",
- desc:`Abono ${e.cliente}`,
- monto,
- fecha:new Date().toLocaleDateString()
  });
 
  actualizarTodo();
+
+}
+
+window.abonarDeuda = function(id,monto){
+
+ const d = deudas.find(x=>x.id===id);
+
+ if(!d) return;
+
+ d.monto -= monto;
+
+ transacciones.push({
+
+  id:Date.now(),
+  tipo:"ingreso",
+  desc:"Abono deuda "+d.cliente,
+  monto,
+  fecha:new Date().toLocaleDateString()
+
+ });
+
+ if(d.monto <= 0){
+
+  deudas = deudas.filter(x=>x.id!==id);
+
+ }
+
+ actualizarTodo();
+
 }
 
 /* =========================
@@ -361,136 +397,10 @@ UTILIDADES UI
 function setTexto(id,valor){
 
  const el = document.getElementById(id);
+
  if(!el) return;
 
  el.innerText = "$" + formatearNumero(valor);
-}
-/* =========================
-NAVEGACION
-========================= */
-
-function showSection(id){
-
- document.querySelectorAll("section").forEach(sec=>{
-  sec.classList.remove("active");
- });
-
- const seccion = document.getElementById(id);
- if(seccion) seccion.classList.add("active");
 
 }
-
-function toggleMenu(){
-
- const sidebar = document.getElementById("sidebar");
-
- if(sidebar){
-  sidebar.classList.toggle("active");
- }
-
-}
-/* =========================
-SELECCIONAR PRODUCTO
-========================= */
-
-let productoSeleccionado = null;
-
-window.seleccionarProducto = function(id){
-
- productoSeleccionado = id;
-
- const producto = productos.find(p=>p.id===id);
-
- const lista = document.getElementById("lista-sugerencias");
-
- if(lista) lista.innerHTML = producto.nombre;
-
-}
-/* =========================
-FORMULARIO INVENTARIO
-========================= */
-
-const formInventario = document.getElementById("form-agregar-producto");
-
-if(formInventario){
-
- formInventario.addEventListener("submit", e=>{
-
-  e.preventDefault();
-
-  const nombre = document.getElementById("prod-nombre").value;
-  const cantidad = parseInt(document.getElementById("prod-cantidad").value);
-  const costo = limpiarNumero(document.getElementById("prod-costo").value);
-  const precio = limpiarNumero(document.getElementById("prod-precio").value);
-
-  productos.push({
-   id: Date.now(),
-   nombre,
-   cantidad,
-   costo,
-   precio
-  });
-
-  actualizarTodo();
-
-  formInventario.reset();
-
- });
-
-}
-/* =========================
-FORMULARIO COMPRAS
-========================= */
-
-const formCompra = document.getElementById("form-compra");
-
-if(formCompra){
-
- formCompra.addEventListener("submit", e=>{
-
-  e.preventDefault();
-
-  const nombre = document.getElementById("compra-nombre").value;
-  const cantidad = parseInt(document.getElementById("compra-cantidad").value);
-  const costo = limpiarNumero(document.getElementById("compra-costo").value);
-
-  registrarCompra(nombre,cantidad,costo);
-
-  formCompra.reset();
-
- });
-
-}
-/* =========================
-FORMULARIO VENTAS
-========================= */
-
-const formVenta = document.getElementById("form-venta");
-
-if(formVenta){
-
- formVenta.addEventListener("submit", e=>{
-
-  e.preventDefault();
-
-  const cantidad = parseInt(document.getElementById("venta-cantidad").value);
-
-  if(!productoSeleccionado){
-   alert("Seleccione un producto");
-   return;
-  }
-
-  venderProducto(productoSeleccionado,cantidad);
-
-  productoSeleccionado = null;
-
-  formVenta.reset();
-
-  const lista = document.getElementById("lista-sugerencias");
-  if(lista) lista.innerHTML="";
-
- });
-
-}
-
 
