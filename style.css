@@ -25,6 +25,9 @@ padding:15px;
 display:flex;
 flex-direction:column;
 gap:10px;
+position:sticky;
+top:0;
+z-index:100;
 }
 
 header h1{
@@ -71,6 +74,7 @@ SECCIONES
 section{
 display:none;
 margin-bottom:30px;
+animation:fade 0.2s ease;
 }
 
 section.active{
@@ -79,27 +83,42 @@ display:block;
 
 section h2{
 margin-bottom:15px;
+font-size:20px;
 }
 
 /* =========================
 DASHBOARD
 ========================= */
 
-#dashboard div{
+.dashboard-grid{
 
 display:grid;
-grid-template-columns:1fr 1fr;
+grid-template-columns:1fr;
 gap:12px;
 
 }
 
-#dashboard p{
+.card{
 
 background:white;
-padding:15px;
-border-radius:8px;
-box-shadow:0 2px 6px rgba(0,0,0,0.08);
+padding:18px;
+border-radius:10px;
+box-shadow:0 3px 8px rgba(0,0,0,0.08);
+
+}
+
+.card h3{
+
 font-size:14px;
+color:#6b7280;
+margin-bottom:6px;
+
+}
+
+.card p{
+
+font-size:20px;
+font-weight:bold;
 
 }
 
@@ -122,6 +141,7 @@ padding:10px;
 border:1px solid #ccc;
 border-radius:6px;
 font-size:14px;
+width:100%;
 
 }
 
@@ -150,9 +170,9 @@ table{
 width:100%;
 border-collapse:collapse;
 background:white;
-border-radius:8px;
+border-radius:10px;
 overflow:hidden;
-box-shadow:0 2px 6px rgba(0,0,0,0.08);
+box-shadow:0 2px 8px rgba(0,0,0,0.08);
 }
 
 thead{
@@ -200,6 +220,7 @@ background:white;
 border:1px solid #ddd;
 border-radius:6px;
 margin-top:5px;
+overflow:hidden;
 
 }
 
@@ -231,6 +252,99 @@ box-shadow:0 2px 6px rgba(0,0,0,0.05);
 
 }
 
+#panel-entregar{
+
+display:flex;
+flex-direction:column;
+gap:12px;
+
+}
+
+.pedido-entrega{
+
+background:white;
+padding:12px;
+border-radius:8px;
+box-shadow:0 2px 6px rgba(0,0,0,0.08);
+
+}
+
+.fila-pedido{
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:10px;
+margin-top:8px;
+flex-wrap:wrap;
+
+}
+
+.fila-pedido button{
+
+padding:6px 10px;
+border:none;
+border-radius:5px;
+background:#2563eb;
+color:white;
+font-size:12px;
+cursor:pointer;
+
+}
+
+/* =========================
+LISTA COMPRAS
+========================= */
+
+#lista-compras{
+
+background:white;
+padding:10px;
+border-radius:8px;
+box-shadow:0 2px 6px rgba(0,0,0,0.08);
+
+}
+
+.item-compra{
+
+padding:8px;
+border-bottom:1px solid #eee;
+font-size:14px;
+
+}
+
+/* =========================
+ANIMACION
+========================= */
+
+@keyframes fade{
+
+from{
+opacity:0;
+transform:translateY(5px);
+}
+
+to{
+opacity:1;
+transform:translateY(0);
+}
+
+}
+
+/* =========================
+RESPONSIVE TABLETS
+========================= */
+
+@media(min-width:600px){
+
+.dashboard-grid{
+
+grid-template-columns:1fr 1fr;
+
+}
+
+}
+
 /* =========================
 RESPONSIVE PC
 ========================= */
@@ -258,7 +372,7 @@ margin:auto;
 
 }
 
-#dashboard div{
+.dashboard-grid{
 
 grid-template-columns:repeat(3,1fr);
 
