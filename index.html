@@ -25,6 +25,7 @@
 <button onclick="showSection('compras')">Compras</button>
 <button onclick="showSection('ventas')">Ventas</button>
 <button onclick="showSection('pedidos')">Pedidos</button>
+<button onclick="showSection('preparar')">Preparar</button>
 <button onclick="showSection('deudas')">Deudas</button>
 
 </nav>
@@ -41,14 +42,37 @@
 
 <h2>Panel financiero</h2>
 
-<div>
+<div class="dashboard-grid">
 
-<p>Efectivo: <span id="dash-efectivo">0</span></p>
-<p>Inventario costo: <span id="dash-inv-costo">0</span></p>
-<p>Inventario venta: <span id="dash-inv-venta">0</span></p>
-<p>Deudas clientes: <span id="dash-deudas">0</span></p>
-<p>Ganancia neta: <span id="dash-ganancia">0</span></p>
-<p>Patrimonio: <span id="dash-patrimonio">0</span></p>
+<div class="card">
+<h3>Efectivo</h3>
+<p id="dash-efectivo">0</p>
+</div>
+
+<div class="card">
+<h3>Inventario costo</h3>
+<p id="dash-inv-costo">0</p>
+</div>
+
+<div class="card">
+<h3>Inventario venta</h3>
+<p id="dash-inv-venta">0</p>
+</div>
+
+<div class="card">
+<h3>Deudas clientes</h3>
+<p id="dash-deudas">0</p>
+</div>
+
+<div class="card">
+<h3>Ganancia neta</h3>
+<p id="dash-ganancia">0</p>
+</div>
+
+<div class="card">
+<h3>Patrimonio</h3>
+<p id="dash-patrimonio">0</p>
+</div>
 
 </div>
 
@@ -61,17 +85,6 @@
 <section id="inventario">
 
 <h2>Inventario</h2>
-
-<form id="form-agregar-producto">
-
-<input id="prod-nombre" placeholder="Nombre producto" required>
-<input id="prod-cantidad" type="number" placeholder="Cantidad" required>
-<input id="prod-costo" placeholder="Costo">
-<input id="prod-precio" placeholder="Precio venta">
-
-<button type="submit">Agregar producto</button>
-
-</form>
 
 <table>
 
@@ -104,13 +117,20 @@
 <form id="form-compra">
 
 <input id="compra-nombre" placeholder="Producto" required>
+
 <input id="compra-cantidad" type="number" placeholder="Cantidad" required>
+
 <input id="compra-costo" placeholder="Costo unitario" required>
+
 <input id="compra-precio" placeholder="Precio venta mercado">
 
 <button type="submit">Registrar compra</button>
 
 </form>
+
+<h3>Lista de compras</h3>
+
+<div id="lista-compras"></div>
 
 </section>
 
@@ -122,13 +142,22 @@
 
 <h2>Registrar venta</h2>
 
-<input id="buscar-producto" placeholder="Buscar producto" onkeyup="buscarProductos(this.value)">
+<input 
+id="buscar-producto" 
+placeholder="Buscar producto"
+onkeyup="buscarProductos(this.value)"
+>
 
 <div id="lista-sugerencias"></div>
 
 <form id="form-venta">
 
-<input id="venta-cantidad" type="number" placeholder="Cantidad">
+<input 
+id="venta-cantidad"
+type="number"
+placeholder="Cantidad"
+required
+>
 
 <button type="submit">Vender</button>
 
@@ -146,27 +175,50 @@
 
 <form id="form-pedido">
 
-<input id="pedido-cliente" placeholder="Nombre cliente">
+<input 
+id="pedido-cliente"
+placeholder="Nombre cliente"
+required
+>
 
-<input id="pedido-producto" placeholder="Producto">
+<input 
+id="pedido-producto"
+placeholder="Producto"
+required
+>
 
-<input id="pedido-cantidad" type="number" placeholder="Cantidad">
+<input 
+id="pedido-cantidad"
+type="number"
+placeholder="Cantidad"
+required
+>
 
-<button type="button" onclick="agregarProductoPedido()">Agregar producto</button>
+<button type="button" onclick="agregarProductoPedido()">
+Agregar producto
+</button>
 
-<button type="submit">Guardar pedido</button>
+<button type="submit">
+Guardar pedido
+</button>
 
 </form>
+
+<h3>Productos del pedido</h3>
 
 <div id="productos-pedido"></div>
 
 </section>
 
+<!-- ========================= -->
+<!-- PREPARAR PEDIDOS -->
+<!-- ========================= -->
+
 <section id="preparar">
 
-<h2>Preparar pedidos</h2>
+<h2>Preparar / Entregar pedidos</h2>
 
-<div id="panel-preparar"></div>
+<div id="panel-entregar"></div>
 
 </section>
 
@@ -180,10 +232,21 @@
 
 <form id="form-deuda">
 
-<input id="deuda-cliente" placeholder="Cliente">
-<input id="deuda-monto" placeholder="Monto">
+<input 
+id="deuda-cliente"
+placeholder="Cliente"
+required
+>
 
-<button type="submit">Registrar deuda</button>
+<input 
+id="deuda-monto"
+placeholder="Monto"
+required
+>
+
+<button type="submit">
+Registrar deuda
+</button>
 
 </form>
 
@@ -212,6 +275,7 @@
 <!-- ========================= -->
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
@@ -219,14 +283,14 @@
 const firebaseConfig = {
 
 apiKey: "AIzaSyA8geCNvANZViVQg57FP2-hBinLaw4v2efI",
-  authDomain: "sistema-motika.firebaseapp.com",
-  databaseURL: "https://sistema-motika-default-rtdb.firebaseio.com",
-  projectId: "sistema-motika",
-  storageBucket: "sistema-motika.firebasestorage.app",
-  messagingSenderId: "94857706277",
-  appId: "1:94857706277:web:b16edddaf6b5b91606f38cc"
-};
+authDomain: "sistema-motika.firebaseapp.com",
+databaseURL: "https://sistema-motika-default-rtdb.firebaseio.com",
+projectId: "sistema-motika",
+storageBucket: "sistema-motika.firebasestorage.app",
+messagingSenderId: "94857706277",
+appId: "1:94857706277:web:b16edddaf6b5b91606f38cc"
 
+};
 
 firebase.initializeApp(firebaseConfig);
 
@@ -237,5 +301,4 @@ const db = firebase.database();
 <script src="script.js"></script>
 
 </body>
-
 </html>
