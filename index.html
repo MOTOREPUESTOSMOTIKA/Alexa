@@ -119,11 +119,29 @@
 
 <input id="compra-nombre" placeholder="Producto" required>
 
-<input id="compra-cantidad" type="number" placeholder="Cantidad" required>
+<input
+id="compra-cantidad"
+type="number"
+inputmode="numeric"
+min="1"
+placeholder="Cantidad"
+required
+>
 
-<input id="compra-costo" placeholder="Costo unitario" required>
+<input 
+id="compra-costo"
+type="number"
+inputmode="numeric"
+placeholder="Costo unitario"
+required
+>
 
-<input id="compra-precio" placeholder="Precio venta mercado">
+<input
+id="compra-precio"
+type="number"
+inputmode="numeric"
+placeholder="Precio venta mercado"
+>
 
 <button type="submit">Registrar compra</button>
 
@@ -154,6 +172,8 @@ onkeyup="buscarProductos(this.value)"
 <input 
 id="venta-cantidad"
 type="number"
+inputmode="numeric"
+min="1"
 placeholder="Cantidad"
 required
 >
@@ -187,9 +207,12 @@ required
 <input 
 id="pedido-cantidad"
 type="number"
+inputmode="numeric"
+min="1"
 placeholder="Cantidad"
 required
 >
+
 
 <button type="button" onclick="agregarProductoPedido()">
 Agregar producto
@@ -227,7 +250,13 @@ Guardar pedido
 
 <input id="deuda-cliente" placeholder="Cliente" required>
 
-<input id="deuda-monto" placeholder="Monto" required>
+<input
+id="deuda-monto"
+type="number"
+inputmode="numeric"
+placeholder="Monto"
+required
+>
 
 <button type="submit">
 Registrar deuda
