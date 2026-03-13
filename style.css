@@ -502,3 +502,102 @@ padding-bottom:80px;
 }
 
 }
+/* =========================
+MODO OSCURO GLOBAL
+========================= */
+
+body.dark{
+background:#000;
+color:#ffffff;
+}
+
+/* HEADER */
+
+body.dark header{
+background:#0f172a;
+color:white;
+}
+
+/* SIDEBAR */
+
+body.dark .sidebar{
+background:#020617;
+}
+
+body.dark .sidebar button{
+color:white;
+}
+
+body.dark .sidebar button:hover{
+background:#1e293b;
+}
+
+/* TARJETAS */
+
+body.dark .card{
+background:#111827;
+color:white;
+box-shadow:none;
+}
+
+/* FORMULARIOS */
+
+body.dark input{
+background:#111827;
+color:white;
+border:1px solid #374151;
+}
+
+body.dark form button{
+background:#374151;
+}
+
+body.dark form button:hover{
+background:#4b5563;
+}
+
+/* TABLAS */
+
+body.dark table{
+background:#111827;
+color:white;
+}
+
+body.dark thead{
+background:#1f2937;
+}
+
+body.dark tbody tr:nth-child(even){
+background:#0f172a;
+}
+
+/* LISTAS */
+
+body.dark #lista-sugerencias{
+background:#111827;
+border:1px solid #374151;
+}
+
+body.dark #lista-sugerencias div:hover{
+background:#1f2937;
+}
+
+/* PEDIDOS */
+
+body.dark .pedido-entrega{
+background:#111827;
+}
+
+body.dark #productos-pedido{
+background:#111827;
+}
+
+/* BOTONES TABLA */
+
+body.dark td button{
+background:#374151;
+}
+
+body.dark td button:hover{
+background:#4b5563;
+}
