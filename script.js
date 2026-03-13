@@ -16,46 +16,76 @@ FUNCIONES NUMERICAS
 ========================= */
 
 function limpiarNumero(valor){
+
  if(!valor) return 0;
- return parseFloat(valor.toString().replace(/\./g,'').replace(',','.')) || 0;
+
+ return parseFloat(
+  valor.toString()
+  .replace(/\./g,'')
+  .replace(',','.')
+ ) || 0;
+
 }
 
 function formatearNumero(valor){
+
  return Number(valor || 0).toLocaleString('es-CO');
+
 }
 
 /* =========================
-SINCRONIZACION FIREBASE
+ESPERAR FIREBASE
 ========================= */
 
-db.ref("motika_data").on("value", snap=>{
+function iniciarFirebase(){
 
- const data = snap.val();
- if(!data) return;
+ if(typeof db === "undefined"){
 
- productos = data.productos || [];
- transacciones = data.transacciones || [];
- compras = data.compras || [];
- pedidos = data.pedidos || [];
- deudas = data.deudas || [];
- historialReportes = data.historialReportes || [];
+  setTimeout(iniciarFirebase,500);
+  return;
 
- renderTodo();
+ }
 
-});
+ console.log("Firebase conectado");
+
+ db.ref("motika_data").on("value", snap=>{
+
+  const data = snap.val() || {};
+
+  productos = data.productos || [];
+  transacciones = data.transacciones || [];
+  compras = data.compras || [];
+  pedidos = data.pedidos || [];
+  deudas = data.deudas || [];
+  historialReportes = data.historialReportes || [];
+
+  renderTodo();
+
+ });
+
+}
+
+iniciarFirebase();
+
+/* =========================
+GUARDAR TODO
+========================= */
 
 function actualizarTodo(){
 
  db.ref("motika_data").set({
+
   productos,
   transacciones,
   compras,
   pedidos,
   deudas,
   historialReportes
+
  });
 
  renderTodo();
+
 }
 
 /* =========================
@@ -68,17 +98,22 @@ function calcularEfectivo(){
  let gastos = 0;
 
  transacciones.forEach(t=>{
+
   if(t.tipo==="ingreso") ingresos += t.monto;
   if(t.tipo==="gasto") gastos += t.monto;
+
  });
 
  return ingresos - gastos;
+
 }
 
 function calcularInventarioCosto(){
 
  return productos.reduce((acc,p)=>{
+
   return acc + (p.costo * p.cantidad);
+
  },0);
 
 }
@@ -86,7 +121,9 @@ function calcularInventarioCosto(){
 function calcularInventarioVenta(){
 
  return productos.reduce((acc,p)=>{
+
   return acc + (p.precio * p.cantidad);
+
  },0);
 
 }
@@ -94,7 +131,9 @@ function calcularInventarioVenta(){
 function calcularDeudas(){
 
  return deudas.reduce((acc,d)=>{
+
   return acc + d.monto;
+
  },0);
 
 }
@@ -105,10 +144,14 @@ function calcularGanancia(){
  let costo = 0;
 
  transacciones.forEach(t=>{
+
   if(t.tipo==="venta"){
+
    ventas += t.monto;
    costo += t.costo || 0;
+
   }
+
  });
 
  let gastos = transacciones
@@ -116,15 +159,15 @@ function calcularGanancia(){
  .reduce((acc,g)=>acc + g.monto,0);
 
  return ventas - costo - gastos;
+
 }
 
 function calcularPatrimonio(){
 
- const efectivo = calcularEfectivo();
- const inventario = calcularInventarioCosto();
- const deuda = calcularDeudas();
+ return calcularEfectivo()
+ + calcularInventarioCosto()
+ + calcularDeudas();
 
- return efectivo + inventario + deuda;
 }
 
 /* =========================
@@ -152,9 +195,10 @@ function renderInventario(){
 
  tabla.innerHTML = productos.map(p=>{
 
- const alerta = p.cantidad<=3 ? "⚠️" : "";
+ const alerta = p.cantidad <= 3 ? "⚠️" : "";
 
  return `
+
  <tr>
 
  <td>${p.nombre}</td>
@@ -171,37 +215,56 @@ function renderInventario(){
  </td>
 
  </tr>
+
  `;
 
  }).join("");
 
 }
 
+/* =========================
+EDITAR PRECIO
+========================= */
+
 window.editarPrecio = function(id){
 
  const p = productos.find(x=>x.id===id);
 
- const nuevo = prompt("Nuevo precio venta",p.precio);
+ if(!p) return;
+
+ const nuevo = prompt("Nuevo precio de venta:",p.precio);
 
  if(nuevo===null) return;
 
  p.precio = limpiarNumero(nuevo);
 
  actualizarTodo();
+
 }
+
+/* =========================
+EDITAR STOCK
+========================= */
 
 window.editarStock = function(id){
 
  const p = productos.find(x=>x.id===id);
 
- const nuevo = prompt("Nuevo stock",p.cantidad);
+ if(!p) return;
+
+ const nuevo = prompt("Nuevo stock:",p.cantidad);
 
  if(nuevo===null) return;
 
- p.cantidad = parseInt(nuevo)||0;
+ p.cantidad = parseInt(nuevo) || 0;
 
  actualizarTodo();
+
 }
+
+/* =========================
+ELIMINAR PRODUCTO
+========================= */
 
 window.eliminarProducto = function(id){
 
@@ -210,6 +273,7 @@ window.eliminarProducto = function(id){
  productos = productos.filter(p=>p.id!==id);
 
  actualizarTodo();
+
 }
 
 /* =========================
@@ -218,47 +282,65 @@ REGISTRAR COMPRA
 
 window.registrarCompra = function(nombre,cantidad,costo,precioVenta){
 
+ if(!nombre) return alert("Nombre requerido");
+
+ cantidad = parseInt(cantidad);
+ costo = limpiarNumero(costo);
+ precioVenta = limpiarNumero(precioVenta);
+
+ if(!cantidad || !costo) return alert("Datos inválidos");
+
  const total = cantidad * costo;
 
- let producto = productos.find(p=>p.nombre.toLowerCase()===nombre.toLowerCase());
+ let producto = productos.find(
+ p=>p.nombre.toLowerCase()===nombre.toLowerCase()
+ );
 
  if(producto){
 
  producto.cantidad += cantidad;
  producto.costo = costo;
- producto.precio = precioVenta;
+
+ if(precioVenta) producto.precio = precioVenta;
 
  }else{
 
  productos.push({
+
   id: Date.now(),
   nombre,
   cantidad,
   costo,
-  precio:precioVenta
+  precio: precioVenta || (costo * 1.3)
+
  });
 
  }
 
  compras.push({
-  id:Date.now(),
+
+  id: Date.now(),
   nombre,
   cantidad,
   costo,
   precioVenta,
   total,
-  fecha:new Date().toLocaleDateString()
+  fecha: new Date().toLocaleDateString()
+
  });
 
  transacciones.push({
-  id:Date.now()+1,
-  tipo:"gasto",
-  desc:"Compra mercancía",
-  monto:total,
-  fecha:new Date().toLocaleDateString()
+
+  id: Date.now()+1,
+  tipo: "gasto",
+  desc: "Compra mercancía",
+  monto: total,
+  fecha: new Date().toLocaleDateString()
+
  });
 
  actualizarTodo();
+
 }
 
 /* =========================
@@ -267,11 +349,16 @@ VENTAS
 
 window.venderProducto = function(id,cantidad){
 
+ cantidad = parseInt(cantidad);
+
  const p = productos.find(x=>x.id==id);
 
  if(!p) return alert("Producto no existe");
 
- if(p.cantidad < cantidad) return alert("Stock insuficiente");
+ if(!cantidad) return alert("Cantidad inválida");
+
+ if(p.cantidad < cantidad)
+ return alert("Stock insuficiente");
 
  p.cantidad -= cantidad;
 
@@ -280,16 +367,95 @@ window.venderProducto = function(id,cantidad){
 
  transacciones.push({
 
-  id:Date.now(),
-  tipo:"venta",
-  desc:p.nombre,
+  id: Date.now(),
+  tipo: "venta",
+  desc: p.nombre,
   monto,
   costo,
-  fecha:new Date().toLocaleDateString()
+  fecha: new Date().toLocaleDateString()
 
  });
 
  actualizarTodo();
+
+}
+
+/* =========================
+BUSCAR PRODUCTOS PARA VENTA
+========================= */
+
+window.buscarProductos = function(texto){
+
+ const lista = document.getElementById("lista-sugerencias");
+ if(!lista) return;
+
+ lista.innerHTML = "";
+
+ if(!texto) return;
+
+ const encontrados = productos.filter(p=>
+ p.nombre.toLowerCase().includes(texto.toLowerCase())
+ );
+
+ encontrados.forEach(p=>{
+
+ const div = document.createElement("div");
+
+ div.innerText =
+ `${p.nombre} - $${formatearNumero(p.precio)}`;
+
+ div.onclick = ()=>{
+
+  productoSeleccionado = p.id;
+
+  lista.innerHTML =
+  `<b>${p.nombre}</b> seleccionado`;
+
+ };
+
+ lista.appendChild(div);
+
+ });
+
+}
+
+/* =========================
+PRODUCTO SELECCIONADO
+========================= */
+
+let productoSeleccionado = null;
+
+/* =========================
+FORMULARIO VENTA
+========================= */
+
+const formVenta = document.getElementById("form-venta");
+
+if(formVenta){
+
+ formVenta.addEventListener("submit", e=>{
+
+  e.preventDefault();
+
+  if(!productoSeleccionado)
+  return alert("Seleccione producto");
+
+  const cantidad =
+  document.getElementById("venta-cantidad").value;
+
+  venderProducto(productoSeleccionado,cantidad);
+
+  productoSeleccionado = null;
+
+  formVenta.reset();
+
+  const lista =
+  document.getElementById("lista-sugerencias");
+
+  if(lista) lista.innerHTML = "";
+
+ });
+
 }
 /* =========================
 PEDIDOS
@@ -297,17 +463,26 @@ PEDIDOS
 
 window.crearPedido = function(cliente,productosPedido){
 
+ if(!cliente) return alert("Cliente requerido");
+
+ if(!productosPedido || productosPedido.length===0)
+ return alert("Debe agregar productos");
+
  pedidos.push({
-  id:Date.now(),
+
+  id: Date.now(),
   cliente,
-  productos:productosPedido
+  productos: productosPedido,
+  fecha: new Date().toLocaleDateString()
+
  });
 
  actualizarTodo();
+
 }
 
 /* =========================
-LISTA DE COMPRAS
+LISTA AUTOMATICA DE COMPRAS
 ========================= */
 
 function generarListaCompras(){
@@ -331,19 +506,27 @@ function generarListaCompras(){
  });
 
  return lista;
+
 }
 
 /* =========================
-DEUDAS
+REGISTRAR DEUDA
 ========================= */
 
 window.registrarDeuda = function(cliente,monto){
 
+ if(!cliente) return alert("Cliente requerido");
+
+ monto = limpiarNumero(monto);
+
+ if(!monto) return alert("Monto inválido");
+
  deudas.push({
 
-  id:Date.now(),
+  id: Date.now(),
   cliente,
-  monto
+  monto,
+  fecha: new Date().toLocaleDateString()
 
  });
 
@@ -351,21 +534,32 @@ window.registrarDeuda = function(cliente,monto){
 
 }
 
+/* =========================
+ABONAR DEUDA
+========================= */
+
 window.abonarDeuda = function(id,monto){
 
  const d = deudas.find(x=>x.id===id);
 
  if(!d) return;
 
+ monto = limpiarNumero(monto);
+
+ if(!monto) return;
+
+ if(monto > d.monto)
+ return alert("El abono supera la deuda");
+
  d.monto -= monto;
 
  transacciones.push({
 
-  id:Date.now(),
-  tipo:"ingreso",
-  desc:"Abono deuda "+d.cliente,
+  id: Date.now(),
+  tipo: "ingreso",
+  desc: "Abono deuda " + d.cliente,
   monto,
-  fecha:new Date().toLocaleDateString()
+  fecha: new Date().toLocaleDateString()
 
  });
 
@@ -380,6 +574,78 @@ window.abonarDeuda = function(id,monto){
 }
 
 /* =========================
+RENDER DE DEUDAS
+========================= */
+
+function renderDeudas(){
+
+ const tabla = document.getElementById("tabla-deudas");
+
+ if(!tabla) return;
+
+ tabla.innerHTML = deudas.map(d=>{
+
+ return `
+
+ <tr>
+
+ <td>${d.cliente}</td>
+
+ <td>$${formatearNumero(d.monto)}</td>
+
+ <td>
+
+ <button onclick="abonarPrompt(${d.id})">
+ Abonar
+ </button>
+
+ </td>
+
+ </tr>
+
+ `;
+
+ }).join("");
+
+}
+
+window.abonarPrompt = function(id){
+
+ const monto = prompt("Monto a abonar:");
+
+ if(monto===null) return;
+
+ abonarDeuda(id,monto);
+
+}
+
+/* =========================
+FORMULARIO DEUDA
+========================= */
+
+const formDeuda = document.getElementById("form-deuda");
+
+if(formDeuda){
+
+ formDeuda.addEventListener("submit", e=>{
+
+  e.preventDefault();
+
+  const cliente =
+  document.getElementById("deuda-cliente").value;
+
+  const monto =
+  document.getElementById("deuda-monto").value;
+
+  registrarDeuda(cliente,monto);
+
+  formDeuda.reset();
+
+ });
+
+}
+
+/* =========================
 RENDER GENERAL
 ========================= */
 
@@ -387,6 +653,7 @@ function renderTodo(){
 
  renderDashboard();
  renderInventario();
+ renderDeudas();
 
 }
 
@@ -404,3 +671,18 @@ function setTexto(id,valor){
 
 }
 
+/* =========================
+NAVEGACION ENTRE SECCIONES
+========================= */
+
+function showSection(id){
+
+ document.querySelectorAll("section").forEach(sec=>{
+  sec.classList.remove("active");
+ });
+
+ const s = document.getElementById(id);
+
+ if(s) s.classList.add("active");
+
+}
