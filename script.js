@@ -100,6 +100,7 @@ function calcularEfectivo(){
 
  let ingresos = 0;
  let gastos = 0;
+ let compras = 0;
 
  transacciones.forEach(t=>{
 
@@ -111,9 +112,13 @@ function calcularEfectivo(){
    gastos += limpiarNumero(t.monto);
   }
 
+  if(t.tipo==="compra"){
+   compras += limpiarNumero(t.monto);
+  }
+
  });
 
- return ingresos - gastos;
+ return ingresos - gastos - compras;
 
 }
 
@@ -163,19 +168,14 @@ function calcularGanancia(){
 
  });
 
- let gastos = transacciones
- .filter(t=>t.tipo==="gasto")
- .reduce((acc,g)=>acc + limpiarNumero(g.monto),0);
-
- return ventas - costo - gastos;
+ return ventas - costo;
 
 }
 
 function calcularPatrimonio(){
 
  return calcularEfectivo()
- + calcularInventarioCosto()
- + calcularDeudas();
+ + calcularInventarioCosto();
 
 }
 
@@ -343,7 +343,7 @@ window.registrarCompra = function(nombre,cantidad,costo,precioVenta){
  transacciones.push({
 
   id: Date.now()+1,
-  tipo: "gasto",
+  tipo: "compra",
   desc: "Compra mercancía",
   monto: total,
   fecha: new Date().toLocaleDateString()
