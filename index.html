@@ -252,10 +252,15 @@ Registrar deuda
 
 </main>
 
+</main>
+
+</div>
+
+</div>
+
 <!-- FIREBASE -->
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
@@ -282,9 +287,7 @@ const db = firebase.database();
 
 <script>
 
-/* =========================
-FORMULARIO COMPRA
-========================= */
+/* FORMULARIO COMPRA */
 
 document.getElementById("form-compra").addEventListener("submit",function(e){
 
@@ -301,28 +304,29 @@ this.reset();
 
 });
 
-/* =========================
-SISTEMA DE PEDIDOS
-========================= */
+
+/* SISTEMA DE PEDIDOS */
 
 let productosPedido = [];
 
 function agregarProductoPedido(){
 
-const nombre =
-document.getElementById("pedido-producto").value;
+const nombre = document.getElementById("pedido-producto").value;
 
-const cantidad =
-document.getElementById("pedido-cantidad").value;
+const cantidad = document.getElementById("pedido-cantidad").value;
 
 if(!nombre || !cantidad){
+
 alert("Ingrese producto y cantidad");
 return;
+
 }
 
 productosPedido.push({
+
 nombre:nombre,
 cantidad:parseInt(cantidad)
+
 });
 
 renderProductosPedido();
@@ -339,9 +343,7 @@ const cont = document.getElementById("productos-pedido");
 cont.innerHTML = productosPedido.map(p=>`
 
 <div>
-
 ${p.nombre} (${p.cantidad})
-
 </div>
 
 `).join("");
@@ -352,8 +354,7 @@ document.getElementById("form-pedido").addEventListener("submit",function(e){
 
 e.preventDefault();
 
-const cliente =
-document.getElementById("pedido-cliente").value;
+const cliente = document.getElementById("pedido-cliente").value;
 
 crearPedido(cliente,productosPedido);
 
@@ -366,7 +367,6 @@ this.reset();
 });
 
 </script>
-</div>
-</div>
+
 </body>
 </html>
