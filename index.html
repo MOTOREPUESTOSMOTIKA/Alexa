@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>MOTIKA | Sistema de Control</title>
+
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.json">
+
+<meta name="theme-color" content="#4A90E2">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<script>
+if ('serviceWorker' in navigator) {
+ navigator.serviceWorker.register('./sw.js');
+}
+</script>
+
+</head>
+
+<body>
+
+<button class="menu-toggle" onclick="toggleMenu()">☰</button>
+
+<nav class="sidebar" id="sidebar">
+
+<h2>MOTIKA</h2>
+
+<ul>
+
+<li>
+<button onclick="showSection('dashboard');toggleMenu()">
+🏠 Panel Control
+</button>
+</li>
+
+<li>
+<button onclick="showSection('inventario');toggleMenu()">
+📦 Inventario
+</button>
+</li>
+
+<li>
+<button onclick="showSection('ventas');toggleMenu()">
+💰 Ventas
+</button>
+</li>
+
+<li>
+<button onclick="showSection('compras');toggleMenu()">
+🛒 Compras
+</button>
+</li>
+
+<li>
+<button onclick="showSection('deudas');toggleMenu()">
+📉 Deudas
+</button>
+</li>
+
+</ul>
+
+</nav>
+
+
+<main class="content">
+
+<!-- DASHBOARD -->
+
+<section id="dashboard" class="active">
+
+<h1>Panel de Control</h1>
+
+<div class="dashboard-grid">
+
+<div class="card">
+<h3>Efectivo</h3>
+<p id="dash-efectivo">$0</p>
+</div>
+
+<div class="card">
+<h3>Inventario Costo</h3>
+<p id="dash-inv-costo">$0</p>
+</div>
+
+<div class="card">
+<h3>Inventario Venta</h3>
+<p id="dash-inv-venta">$0</p>
+</div>
+
+<div class="card">
+<h3>Deudas Clientes</h3>
+<p id="dash-deudas">$0</p>
+</div>
+
+<div class="card">
+<h3>Patrimonio Neto</h3>
+<p id="dash-patrimonio">$0</p>
+</div>
+
+<div class="card">
+<h3>Ganancia Neta</h3>
+<p id="dash-ganancia">$0</p>
+</div>
+
+</div>
+
+</section>
+
+
+<!-- INVENTARIO -->
+
+<section id="inventario">
+
+<h1>Inventario</h1>
+
+<form id="form-agregar-producto">
+
+<input type="text" id="prod-nombre" placeholder="Producto">
+
+<input type="number" id="prod-cantidad" placeholder="Cantidad">
+
+<input type="number" id="prod-costo" placeholder="Costo">
+
+<input type="number" id="prod-precio" placeholder="Precio Venta">
+
+<button type="submit">
+Agregar Producto
+</button>
+
+</form>
+
+
+<div class="table-wrapper">
+
+<table>
+
+<thead>
+
+<tr>
+<th>Producto</th>
+<th>Stock</th>
+<th>Costo</th>
+<th>Precio</th>
+<th>Acción</th>
+</tr>
+
+</thead>
+
+<tbody id="tabla-inventario"></tbody>
+
+</table>
+
+</div>
+
+</section>
+
+
+
+<!-- VENTAS -->
+
+<section id="ventas">
+
+<h1>Registrar Venta</h1>
+
+<form id="form-venta">
+
+<input 
+type="text" 
+placeholder="Buscar producto"
+onkeyup="buscarProductos(this.value)"
+>
+
+<div id="lista-sugerencias"></div>
+
+<input type="hidden" id="producto-id">
+
+<input type="number" id="venta-cantidad" placeholder="Cantidad">
+
+<button type="submit">
+Vender
+</button>
+
+</form>
+
+</section>
+
+
+
+<!-- COMPRAS -->
+
+<section id="compras">
+
+<h1>Registrar Compra</h1>
+
+<form id="form-compra">
+
+<input type="text" id="compra-nombre" placeholder="Producto">
+
+<input type="number" id="compra-cantidad" placeholder="Cantidad">
+
+<input type="number" id="compra-costo" placeholder="Costo Unitario">
+
+<button type="submit">
+Registrar Compra
+</button>
+
+</form>
+
+</section>
+
+
+
+<!-- DEUDAS -->
+
+<section id="deudas">
+
+<h1>Control de Deudas</h1>
+
+<table>
+
+<thead>
+
+<tr>
+<th>Cliente</th>
+<th>Deuda</th>
+<th>Abonar</th>
+<th>Acción</th>
+</tr>
+
+</thead>
+
+<tbody id="tabla-deudas"></tbody>
+
+</table>
+
+</section>
+
+</main>
+
+
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
+
+
+<script>
+
+const firebaseConfig = {
+
+apiKey: "AIzaSyAgecNVaN2viV9q57FP2-hBinLaw4v2efI",
+
+authDomain: "sistema-motika.firebaseapp.com",
+
+databaseURL: "https://sistema-motika-default-rtdb.firebaseio.com",
+
+projectId: "sistema-motika",
+
+storageBucket: "sistema-motika.firebasestorage.app",
+
+messagingSenderId: "94857706277",
+
+appId: "1:94857706277:web:b16eddaf6b5b91606f38cc"
+
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.database();
+
+</script>
+
+
+<script src="script.js"></script>
+
+</body>
+</html>
