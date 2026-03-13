@@ -316,7 +316,7 @@ const valorCompra = cantidad * costo;
 const nuevaCantidad = cantidadAnterior + cantidad;
 
 const nuevoCostoPromedio =
- (valorAnterior + valorCompra) / nuevaCantidad;
+ Math.round((valorAnterior + valorCompra) / nuevaCantidad);
 
 producto.cantidad = nuevaCantidad;
 producto.costo = nuevoCostoPromedio;
@@ -324,10 +324,6 @@ producto.costo = nuevoCostoPromedio;
 if(precioVenta){
  producto.precio = precioVenta;
 }
-
-  if(precioVenta){
-   producto.precio = precioVenta;
-  }
 
  }else{
 
