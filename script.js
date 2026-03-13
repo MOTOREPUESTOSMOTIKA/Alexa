@@ -48,10 +48,10 @@ function iniciarFirebase(){
 
  console.log("Firebase conectado");
 
- db.ref("motika_data").on("value", snap=>{
-  
-console.log("Datos recibidos:", snap.val());
-  
+ db.ref("motika_data").once("value").then(snap=>{
+
+  console.log("Datos recibidos:", snap.val());
+
   const data = snap.val() || {};
 
   productos = data.productos || [];
@@ -60,8 +60,8 @@ console.log("Datos recibidos:", snap.val());
   pedidos = data.pedidos || [];
   deudas = data.deudas || [];
   historialReportes = data.historialReportes || [];
-  
-console.log("Productos cargados:", productos);
+
+  console.log("Productos cargados:", productos);
 
   renderTodo();
 
@@ -77,7 +77,7 @@ GUARDAR TODO
 
 function actualizarTodo(){
 
- db.ref("motika_data").update({
+ db.ref("motika_data").set({
 
   productos: productos,
   transacciones: transacciones,
@@ -103,8 +103,13 @@ function calcularEfectivo(){
 
  transacciones.forEach(t=>{
 
-  if(t.tipo==="ingreso") ingresos += t.monto;
-  if(t.tipo==="gasto") gastos += t.monto;
+  if(t.tipo==="ingreso" || t.tipo==="venta"){
+   ingresos += limpiarNumero(t.monto);
+  }
+
+  if(t.tipo==="gasto"){
+   gastos += limpiarNumero(t.monto);
+  }
 
  });
 
@@ -116,7 +121,7 @@ function calcularInventarioCosto(){
 
  return productos.reduce((acc,p)=>{
 
-  return acc + (p.costo * p.cantidad);
+  return acc + (limpiarNumero(p.costo) * limpiarNumero(p.cantidad));
 
  },0);
 
@@ -126,7 +131,7 @@ function calcularInventarioVenta(){
 
  return productos.reduce((acc,p)=>{
 
-  return acc + (p.precio * p.cantidad);
+  return acc + (limpiarNumero(p.precio) * limpiarNumero(p.cantidad));
 
  },0);
 
@@ -136,7 +141,7 @@ function calcularDeudas(){
 
  return deudas.reduce((acc,d)=>{
 
-  return acc + d.monto;
+  return acc + limpiarNumero(d.monto);
 
  },0);
 
@@ -151,8 +156,8 @@ function calcularGanancia(){
 
   if(t.tipo==="venta"){
 
-   ventas += t.monto;
-   costo += t.costo || 0;
+   ventas += limpiarNumero(t.monto);
+   costo += limpiarNumero(t.costo);
 
   }
 
@@ -160,7 +165,7 @@ function calcularGanancia(){
 
  let gastos = transacciones
  .filter(t=>t.tipo==="gasto")
- .reduce((acc,g)=>acc + g.monto,0);
+ .reduce((acc,g)=>acc + limpiarNumero(g.monto),0);
 
  return ventas - costo - gastos;
 
@@ -188,6 +193,7 @@ function renderDashboard(){
  setTexto("dash-patrimonio",calcularPatrimonio());
 
 }
+
 /* =========================
 INVENTARIO
 ========================= */
@@ -225,14 +231,13 @@ function renderInventario(){
  }).join("");
 
 }
-
 /* =========================
 EDITAR PRECIO
 ========================= */
 
 window.editarPrecio = function(id){
-  
-const p = productos.find(x=>Number(x.id)===Number(id));
+
+ const p = productos.find(x=>Number(x.id)===Number(id));
 
  if(!p) return;
 
@@ -271,7 +276,6 @@ ELIMINAR PRODUCTO
 ========================= */
 
 window.eliminarProducto = function(id){
-  
 
  if(!confirm("Eliminar producto")) return;
 
@@ -303,33 +307,35 @@ window.registrarCompra = function(nombre,cantidad,costo,precioVenta){
 
  if(producto){
 
- producto.cantidad += cantidad;
- producto.costo = costo;
+  producto.cantidad += cantidad;
+  producto.costo = costo;
 
- if(precioVenta) producto.precio = precioVenta;
+  if(precioVenta){
+   producto.precio = precioVenta;
+  }
 
  }else{
 
- productos.push({
+  productos.push({
 
-  id: Date.now(),
-  nombre,
-  cantidad,
-  costo,
-  precio: precioVenta || (costo * 1.3)
+   id: Date.now(),
+   nombre: nombre,
+   cantidad: cantidad,
+   costo: costo,
+   precio: precioVenta || (costo * 1.3)
 
- });
+  });
 
  }
 
  compras.push({
 
   id: Date.now(),
-  nombre,
-  cantidad,
-  costo,
-  precioVenta,
-  total,
+  nombre: nombre,
+  cantidad: cantidad,
+  costo: costo,
+  precioVenta: precioVenta,
+  total: total,
   fecha: new Date().toLocaleDateString()
 
  });
@@ -375,8 +381,8 @@ window.venderProducto = function(id,cantidad){
   id: Date.now(),
   tipo: "venta",
   desc: p.nombre,
-  monto,
-  costo,
+  monto: monto,
+  costo: costo,
   fecha: new Date().toLocaleDateString()
 
  });
@@ -462,8 +468,9 @@ if(formVenta){
  });
 
 }
+
 /* =========================
-PEDIDOS
+CREAR PEDIDO
 ========================= */
 
 window.crearPedido = function(cliente,productosPedido){
@@ -476,7 +483,7 @@ window.crearPedido = function(cliente,productosPedido){
  pedidos.push({
 
   id: Date.now(),
-  cliente,
+  cliente: cliente,
   productos: productosPedido,
   fecha: new Date().toLocaleDateString()
 
@@ -487,7 +494,7 @@ window.crearPedido = function(cliente,productosPedido){
 }
 
 /* =========================
-LISTA AUTOMATICA DE COMPRAS
+LISTA DE COMPRAS TIPO SUPER
 ========================= */
 
 function generarListaCompras(){
@@ -499,12 +506,10 @@ function generarListaCompras(){
   p.productos.forEach(prod=>{
 
    if(!lista[prod.nombre]){
-
     lista[prod.nombre] = 0;
-
    }
 
-   lista[prod.nombre] += prod.cantidad;
+   lista[prod.nombre] += parseInt(prod.cantidad);
 
   });
 
@@ -514,6 +519,39 @@ function generarListaCompras(){
 
 }
 
+/* =========================
+RENDER LISTA COMPRAS
+========================= */
+
+function renderListaCompras(){
+
+ const cont = document.getElementById("lista-compras");
+
+ if(!cont) return;
+
+ const lista = generarListaCompras();
+
+ let html = "";
+
+ Object.keys(lista).forEach(nombre=>{
+
+  html += `
+
+  <div class="item-compra">
+
+  <input type="checkbox">
+
+  ${nombre} (${lista[nombre]})
+
+  </div>
+
+  `;
+
+ });
+
+ cont.innerHTML = html;
+
+}
 /* =========================
 REGISTRAR DEUDA
 ========================= */
@@ -529,8 +567,8 @@ window.registrarDeuda = function(cliente,monto){
  deudas.push({
 
   id: Date.now(),
-  cliente,
-  monto,
+  cliente: cliente,
+  monto: monto,
   fecha: new Date().toLocaleDateString()
 
  });
@@ -563,7 +601,7 @@ window.abonarDeuda = function(id,monto){
   id: Date.now(),
   tipo: "ingreso",
   desc: "Abono deuda " + d.cliente,
-  monto,
+  monto: monto,
   fecha: new Date().toLocaleDateString()
 
  });
@@ -651,6 +689,120 @@ if(formDeuda){
 }
 
 /* =========================
+ENTREGA DE PEDIDOS
+========================= */
+
+function renderEntregarPedidos(){
+
+ const cont = document.getElementById("panel-entregar");
+
+ if(!cont) return;
+
+ cont.innerHTML = "";
+
+ pedidos.forEach(p=>{
+
+ let html = `<div class="pedido-entrega">`;
+
+ html += `<h3>${p.cliente}</h3>`;
+
+ p.productos.forEach(prod=>{
+
+ html += `
+
+ <div class="fila-pedido">
+
+ ${prod.nombre} (${prod.cantidad})
+
+ <button onclick="entregarProducto('${p.id}','${prod.nombre}',${prod.cantidad})">
+ Entregar
+ </button>
+
+ <button onclick="volverPedido('${p.id}','${prod.nombre}')">
+ Volver a pedido
+ </button>
+
+ </div>
+
+ `;
+
+ });
+
+ html += `</div>`;
+
+ cont.innerHTML += html;
+
+ });
+
+}
+
+/* =========================
+ENTREGAR PRODUCTO
+========================= */
+
+window.entregarProducto = function(pedidoId,nombre,cantidad){
+
+ const producto = productos.find(p=>p.nombre===nombre);
+
+ if(!producto){
+
+  alert("Producto no existe en inventario");
+  return;
+
+ }
+
+ if(producto.cantidad < cantidad){
+
+  alert("No hay suficiente stock");
+  return;
+
+ }
+
+ const pedido = pedidos.find(p=>String(p.id)===String(pedidoId));
+
+ if(!pedido) return;
+
+ const decision = confirm(
+ "Aceptar = Venta\nCancelar = Deuda"
+ );
+
+ if(decision){
+
+  venderProducto(producto.id,cantidad);
+
+ }else{
+
+  const monto = producto.precio * cantidad;
+
+  registrarDeuda(pedido.cliente,monto);
+
+ }
+
+ pedido.productos = pedido.productos.filter(
+ p=>p.nombre!==nombre
+ );
+
+ if(pedido.productos.length===0){
+
+  pedidos = pedidos.filter(p=>p.id!==pedidoId);
+
+ }
+
+ actualizarTodo();
+
+}
+
+/* =========================
+VOLVER A PEDIDO
+========================= */
+
+window.volverPedido = function(pedidoId,nombre){
+
+ alert("Producto seguirá pendiente en pedido");
+
+}
+
+/* =========================
 RENDER GENERAL
 ========================= */
 
@@ -659,6 +811,8 @@ function renderTodo(){
  renderDashboard();
  renderInventario();
  renderDeudas();
+ renderListaCompras();
+ renderEntregarPedidos();
 
 }
 
@@ -689,155 +843,5 @@ function showSection(id){
  const s = document.getElementById(id);
 
  if(s) s.classList.add("active");
-
-}
-/* =========================
-PREPARACION DE PEDIDOS
-========================= */
-
-let comprasRecientes = {};
-
-/* registrar lo que se compro realmente */
-
-window.registrarCompraLista = function(producto,cantidad){
-
- cantidad = parseInt(cantidad);
-
- if(!comprasRecientes[producto]){
-
-  comprasRecientes[producto] = 0;
-
- }
-
- comprasRecientes[producto] += cantidad;
-
-}
-
-/* generar pantalla de preparacion */
-
-function renderPrepararPedidos(){
-
- const cont = document.getElementById("panel-preparar");
- if(!cont) return;
-
- cont.innerHTML = "";
-
- pedidos.forEach(p=>{
-
- let html = `<div class="pedido-preparar">`;
-
- html += `<h3>${p.cliente}</h3>`;
-
- p.productos.forEach(prod=>{
-
- const disponible = comprasRecientes[prod.nombre] || 0;
-
- html += `
-
- <div>
-
- ${prod.nombre} ${prod.cantidad}
-
- <input type="number"
- value="0"
- min="0"
- max="${disponible}"
- id="entrega-${p.id}-${prod.nombre}">
-
- </div>
-
- `;
-
- });
-
- html += `
-
- <button onclick="entregarVenta(${p.id})">
- Entregar como venta
- </button>
-
- <button onclick="entregarDeudaPedido(${p.id})">
- Entregar como deuda
- </button>
-
- `;
-
- html += `</div>`;
-
- cont.innerHTML += html;
-
- });
-
-}
-
-/* entregar pedido como venta */
-
-window.entregarVenta = function(id){
-
- const pedido = pedidos.find(p=>p.id===id);
-
- if(!pedido) return;
-
- pedido.productos.forEach(prod=>{
-
- const input = document.getElementById(
- `entrega-${id}-${prod.nombre}`
- );
-
- const cantidad = parseInt(input.value) || 0;
-
- if(cantidad<=0) return;
-
- const producto = productos.find(
- x=>x.nombre===prod.nombre
- );
-
- if(producto){
-
-  venderProducto(producto.id,cantidad);
-
- }
-
- });
-
-}
-
-/* entregar como deuda */
-
-window.entregarDeudaPedido = function(id){
-
- const pedido = pedidos.find(p=>p.id===id);
-
- if(!pedido) return;
-
- let total = 0;
-
- pedido.productos.forEach(prod=>{
-
- const input = document.getElementById(
- `entrega-${id}-${prod.nombre}`
- );
-
- const cantidad = parseInt(input.value) || 0;
-
- if(cantidad<=0) return;
-
- const producto = productos.find(
- x=>x.nombre===prod.nombre
- );
-
- if(producto){
-
-  total += producto.precio * cantidad;
-
- }
-
- });
-
- if(total>0){
-
-  registrarDeuda(pedido.cliente,total);
-
- }
 
 }
