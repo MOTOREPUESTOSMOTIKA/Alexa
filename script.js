@@ -73,14 +73,14 @@ GUARDAR TODO
 
 function actualizarTodo(){
 
- db.ref("motika_data").set({
+ db.ref("motika_data").update({
 
-  productos,
-  transacciones,
-  compras,
-  pedidos,
-  deudas,
-  historialReportes
+  productos: productos,
+  transacciones: transacciones,
+  compras: compras,
+  pedidos: pedidos,
+  deudas: deudas,
+  historialReportes: historialReportes
 
  });
 
