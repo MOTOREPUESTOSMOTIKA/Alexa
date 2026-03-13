@@ -601,3 +601,10 @@ background:#374151;
 body.dark td button:hover{
 background:#4b5563;
 }
+body{
+background:#f4f6f8;
+color:#333;
+touch-action:manipulation;
+}
+
+
