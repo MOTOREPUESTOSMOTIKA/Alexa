@@ -389,3 +389,108 @@ function toggleMenu(){
  }
 
 }
+/* =========================
+SELECCIONAR PRODUCTO
+========================= */
+
+let productoSeleccionado = null;
+
+window.seleccionarProducto = function(id){
+
+ productoSeleccionado = id;
+
+ const producto = productos.find(p=>p.id===id);
+
+ const lista = document.getElementById("lista-sugerencias");
+
+ if(lista) lista.innerHTML = producto.nombre;
+
+}
+/* =========================
+FORMULARIO INVENTARIO
+========================= */
+
+const formInventario = document.getElementById("form-agregar-producto");
+
+if(formInventario){
+
+ formInventario.addEventListener("submit", e=>{
+
+  e.preventDefault();
+
+  const nombre = document.getElementById("prod-nombre").value;
+  const cantidad = parseInt(document.getElementById("prod-cantidad").value);
+  const costo = limpiarNumero(document.getElementById("prod-costo").value);
+  const precio = limpiarNumero(document.getElementById("prod-precio").value);
+
+  productos.push({
+   id: Date.now(),
+   nombre,
+   cantidad,
+   costo,
+   precio
+  });
+
+  actualizarTodo();
+
+  formInventario.reset();
+
+ });
+
+}
+/* =========================
+FORMULARIO COMPRAS
+========================= */
+
+const formCompra = document.getElementById("form-compra");
+
+if(formCompra){
+
+ formCompra.addEventListener("submit", e=>{
+
+  e.preventDefault();
+
+  const nombre = document.getElementById("compra-nombre").value;
+  const cantidad = parseInt(document.getElementById("compra-cantidad").value);
+  const costo = limpiarNumero(document.getElementById("compra-costo").value);
+
+  registrarCompra(nombre,cantidad,costo);
+
+  formCompra.reset();
+
+ });
+
+}
+/* =========================
+FORMULARIO VENTAS
+========================= */
+
+const formVenta = document.getElementById("form-venta");
+
+if(formVenta){
+
+ formVenta.addEventListener("submit", e=>{
+
+  e.preventDefault();
+
+  const cantidad = parseInt(document.getElementById("venta-cantidad").value);
+
+  if(!productoSeleccionado){
+   alert("Seleccione un producto");
+   return;
+  }
+
+  venderProducto(productoSeleccionado,cantidad);
+
+  productoSeleccionado = null;
+
+  formVenta.reset();
+
+  const lista = document.getElementById("lista-sugerencias");
+  if(lista) lista.innerHTML="";
+
+ });
+
+}
+
+
