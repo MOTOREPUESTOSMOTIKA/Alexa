@@ -2,10 +2,11 @@ const CACHE_NAME = "motika-v1";
 
 const urlsToCache = [
 
-"/Alexa/",
-"/Alexa/index.html",
-"/Alexa/style.css",
-"/Alexa/script.js"
+"./",
+"./index.html",
+"./style.css",
+"./script.js",
+"./manifest.json"
 
 ];
 
