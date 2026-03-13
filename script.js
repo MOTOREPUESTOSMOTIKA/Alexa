@@ -686,3 +686,153 @@ function showSection(id){
  if(s) s.classList.add("active");
 
 }
+/* =========================
+PREPARACION DE PEDIDOS
+========================= */
+
+let comprasRecientes = {};
+
+/* registrar lo que se compro realmente */
+
+window.registrarCompraLista = function(producto,cantidad){
+
+ cantidad = parseInt(cantidad);
+
+ if(!comprasRecientes[producto]){
+
+  comprasRecientes[producto] = 0;
+
+ }
+
+ comprasRecientes[producto] += cantidad;
+
+}
+
+/* generar pantalla de preparacion */
+
+function renderPrepararPedidos(){
+
+ const cont = document.getElementById("panel-preparar");
+ if(!cont) return;
+
+ cont.innerHTML = "";
+
+ pedidos.forEach(p=>{
+
+ let html = `<div class="pedido-preparar">`;
+
+ html += `<h3>${p.cliente}</h3>`;
+
+ p.productos.forEach(prod=>{
+
+ const disponible = comprasRecientes[prod.nombre] || 0;
+
+ html += `
+
+ <div>
+
+ ${prod.nombre} ${prod.cantidad}
+
+ <input type="number"
+ value="0"
+ min="0"
+ max="${disponible}"
+ id="entrega-${p.id}-${prod.nombre}">
+
+ </div>
+
+ `;
+
+ });
+
+ html += `
+
+ <button onclick="entregarVenta(${p.id})">
+ Entregar como venta
+ </button>
+
+ <button onclick="entregarDeudaPedido(${p.id})">
+ Entregar como deuda
+ </button>
+
+ `;
+
+ html += `</div>`;
+
+ cont.innerHTML += html;
+
+ });
+
+}
+
+/* entregar pedido como venta */
+
+window.entregarVenta = function(id){
+
+ const pedido = pedidos.find(p=>p.id===id);
+
+ if(!pedido) return;
+
+ pedido.productos.forEach(prod=>{
+
+ const input = document.getElementById(
+ `entrega-${id}-${prod.nombre}`
+ );
+
+ const cantidad = parseInt(input.value) || 0;
+
+ if(cantidad<=0) return;
+
+ const producto = productos.find(
+ x=>x.nombre===prod.nombre
+ );
+
+ if(producto){
+
+  venderProducto(producto.id,cantidad);
+
+ }
+
+ });
+
+}
+
+/* entregar como deuda */
+
+window.entregarDeudaPedido = function(id){
+
+ const pedido = pedidos.find(p=>p.id===id);
+
+ if(!pedido) return;
+
+ let total = 0;
+
+ pedido.productos.forEach(prod=>{
+
+ const input = document.getElementById(
+ `entrega-${id}-${prod.nombre}`
+ );
+
+ const cantidad = parseInt(input.value) || 0;
+
+ if(cantidad<=0) return;
+
+ const producto = productos.find(
+ x=>x.nombre===prod.nombre
+ );
+
+ if(producto){
+
+  total += producto.precio * cantidad;
+
+ }
+
+ });
+
+ if(total>0){
+
+  registrarDeuda(pedido.cliente,total);
+
+ }
+
+}
