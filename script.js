@@ -307,8 +307,23 @@ window.registrarCompra = function(nombre,cantidad,costo,precioVenta){
 
  if(producto){
 
-  producto.cantidad += cantidad;
-  producto.costo = costo;
+  const cantidadAnterior = limpiarNumero(producto.cantidad);
+const costoAnterior = limpiarNumero(producto.costo);
+
+const valorAnterior = cantidadAnterior * costoAnterior;
+const valorCompra = cantidad * costo;
+
+const nuevaCantidad = cantidadAnterior + cantidad;
+
+const nuevoCostoPromedio =
+ (valorAnterior + valorCompra) / nuevaCantidad;
+
+producto.cantidad = nuevaCantidad;
+producto.costo = nuevoCostoPromedio;
+
+if(precioVenta){
+ producto.precio = precioVenta;
+}
 
   if(precioVenta){
    producto.precio = precioVenta;
