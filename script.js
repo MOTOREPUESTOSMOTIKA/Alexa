@@ -536,7 +536,7 @@ RENDER LISTA COMPRAS
 
 function renderListaCompras(){
 
- const cont = document.getElementById("lista-compras");
+ const cont = document.getElementById("contenedor-lista-compras");
 
  if(!cont) return;
 
