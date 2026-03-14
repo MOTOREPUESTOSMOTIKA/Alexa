@@ -495,7 +495,7 @@ window.crearPedido = function(cliente,productosPedido){
 
   id: Date.now(),
   cliente: cliente,
-  productos: productosPedido,
+  productos: [...productosPedido],
   fecha: new Date().toLocaleDateString()
 
  });
