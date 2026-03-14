@@ -71,26 +71,7 @@ function iniciarFirebase(){
 
 iniciarFirebase();
 
-/* =========================
-GUARDAR TODO
-========================= */
 
-function actualizarTodo(){
-
- db.ref("motika_data").set({
-
-  productos: productos,
-  transacciones: transacciones,
-  compras: compras,
-  pedidos: pedidos,
-  deudas: deudas,
-  historialReportes: historialReportes
-
- });
-
- renderTodo();
-
-}
 
 /* =========================
 CALCULOS FINANCIEROS
