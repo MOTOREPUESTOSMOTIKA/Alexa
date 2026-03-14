@@ -512,11 +512,11 @@ function generarListaCompras(){
 
  let lista = {};
 
- pedidos.forEach(p=>{
+(pedidos || []).forEach(p=>{
 
   if(!p.productos) return;
 
-  p.productos.forEach(prod=>{
+(p.productos || []).forEach(prod=>{
 
    if(!lista[prod.nombre]){
     lista[prod.nombre] = 0;
@@ -764,13 +764,13 @@ function renderEntregarPedidos(){
 
  cont.innerHTML = "";
 
- pedidos.forEach(p=>{
+ (pedidos || []).forEach(p=>{
 
  let html = `<div class="pedido-entrega">`;
 
  html += `<h3>${p.cliente}</h3>`;
 
- p.productos.forEach(prod=>{
+(p.productos || []).forEach(prod=>{
 
  html += `
 
