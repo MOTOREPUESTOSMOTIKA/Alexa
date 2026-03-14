@@ -923,35 +923,6 @@ contadorToques = 0;
 });
 
 }
-
-/* =========================
-RESET SISTEMA
-========================= */
-
-if(botonReset){
-
-botonReset.onclick = function(){
-
-if(!confirm("⚠️ Se borrará TODO el sistema. ¿Continuar?")) return;
-
-db.ref("motika_data").remove().then(()=>{
-
-productos = [];
-transacciones = [];
-compras = [];
-pedidos = [];
-deudas = [];
-historialReportes = [];
-
-renderTodo();
-
-alert("Sistema reiniciado");
-
-});
-
-};
-
-}
 /* =========================
 MODO ADMIN (BOTON SECRETO)
 ========================= */
