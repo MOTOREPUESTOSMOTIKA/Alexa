@@ -514,13 +514,15 @@ function generarListaCompras(){
 
  pedidos.forEach(p=>{
 
+  if(!p.productos) return;
+
   p.productos.forEach(prod=>{
 
    if(!lista[prod.nombre]){
     lista[prod.nombre] = 0;
    }
 
-   lista[prod.nombre] += parseInt(prod.cantidad);
+   lista[prod.nombre] += parseInt(prod.cantidad) || 0;
 
   });
 
