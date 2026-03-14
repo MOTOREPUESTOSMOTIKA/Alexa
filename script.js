@@ -778,13 +778,13 @@ function renderEntregarPedidos(){
 
  ${prod.nombre} (${prod.cantidad})
 
- <button onclick="entregarProducto('${p.id}','${prod.nombre}',${prod.cantidad})">
+<button onclick="entregarProducto('${p.id}','${prod.nombre}',${prod.cantidad})">
  Entregar
- </button>
+</button>
 
- <button onclick="volverPedido('${p.id}','${prod.nombre}')">
- Volver a pedido
- </button>
+<button onclick="dejarDeuda('${p.id}','${prod.nombre}',${prod.cantidad})">
+ Deuda
+</button>
 
  </div>
 
@@ -806,66 +806,67 @@ ENTREGAR PRODUCTO
 
 window.entregarProducto = function(pedidoId,nombre,cantidad){
 
- const producto = productos.find(p=>p.nombre===nombre);
+ const producto = productos.find(
+p=>p.nombre.toLowerCase() === nombre.toLowerCase()
+);
 
  if(!producto){
-
   alert("Producto no existe en inventario");
   return;
-
  }
 
  if(producto.cantidad < cantidad){
-
   alert("No hay suficiente stock");
   return;
-
  }
 
  const pedido = pedidos.find(p=>String(p.id)===String(pedidoId));
 
  if(!pedido) return;
 
- const decision = confirm(
- "Aceptar = Venta\nCancelar = Deuda"
- );
-
- if(decision){
-
-  venderProducto(producto.id,cantidad);
-
- }else{
-
-  const monto = producto.precio * cantidad;
-
-  registrarDeuda(pedido.cliente,monto);
-
- }
+ venderProducto(producto.id,cantidad);
 
  pedido.productos = pedido.productos.filter(
- p=>p.nombre!==nombre
+  p=>p.nombre !== nombre
  );
 
- if(pedido.productos.length===0){
-
-  pedidos = pedidos.filter(p=>p.id!==pedidoId);
-
+ if(pedido.productos.length === 0){
+  pedidos = pedidos.filter(p=>p.id !== pedidoId);
  }
 
  actualizarTodo();
 
 }
+window.dejarDeuda = function(pedidoId,nombre,cantidad){
 
-/* =========================
-VOLVER A PEDIDO
-========================= */
+ const producto = productos.find(
+p=>p.nombre.toLowerCase() === nombre.toLowerCase()
+);
 
-window.volverPedido = function(pedidoId,nombre){
+ if(!producto){
+  alert("Producto no existe en inventario");
+  return;
+ }
 
- alert("Producto seguirá pendiente en pedido");
+ const pedido = pedidos.find(p=>String(p.id)===String(pedidoId));
+
+ if(!pedido) return;
+
+ const monto = producto.precio * cantidad;
+
+ registrarDeuda(pedido.cliente,monto);
+
+ pedido.productos = pedido.productos.filter(
+  p=>p.nombre !== nombre
+ );
+
+ if(pedido.productos.length === 0){
+  pedidos = pedidos.filter(p=>p.id !== pedidoId);
+ }
+
+ actualizarTodo();
 
 }
-
 /* =========================
 RENDER GENERAL
 ========================= */
