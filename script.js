@@ -1022,6 +1022,15 @@ window.resetSistema = function(){
   pedidos: [],
   deudas: [],
   historialReportes: []
+  
+  }).then(()=>{
+
+  productos = [];
+  transacciones = [];
+  compras = [];
+  pedidos = [];
+  deudas = [];
+  historialReportes = [];
 
  });
 
