@@ -952,3 +952,41 @@ alert("Sistema reiniciado");
 };
 
 }
+/* =========================
+MODO ADMIN (BOTON SECRETO)
+========================= */
+
+let presionTimer;
+
+const botonLuna = document.getElementById("modo-oscuro");
+
+botonLuna.addEventListener("touchstart",()=>{
+
+presionTimer = setTimeout(()=>{
+
+document.getElementById("reset-sistema").style.display="inline-block";
+alert("Modo administrador activado");
+
+},3000);
+
+});
+
+botonLuna.addEventListener("touchend",()=>{
+clearTimeout(presionTimer);
+});
+
+/* =========================
+RESET SISTEMA
+========================= */
+
+function resetSistema(){
+
+if(!confirm("¿Seguro que quieres borrar TODO el sistema?")) return;
+
+db.ref().remove();
+
+alert("Sistema reiniciado");
+
+location.reload();
+
+}
