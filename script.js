@@ -780,61 +780,63 @@ function renderEntregarPedidos() {
     });
 }
 
-
-
 /* =========================
-ENTREGAR PRODUCTO (CORREGIDO)
+ENTREGAR PRODUCTO (CORREGIDO INDIVIDUAL)
 ========================= */
 window.entregarProducto = function(pedidoId, nombre, cantidad) {
-    const producto = productos.find(
+    const productoInventario = productos.find(
         p => p.nombre.toLowerCase() === nombre.toLowerCase()
     );
 
-    if (!producto) return alert("Producto no existe en inventario");
-
-    if (producto.cantidad < cantidad) return alert("No hay suficiente stock");
+    if (!productoInventario) return alert("Producto no existe en inventario");
+    if (productoInventario.cantidad < cantidad) return alert("No hay suficiente stock");
 
     const pedidoIndex = pedidos.findIndex(p => String(p.id) === String(pedidoId));
     if (pedidoIndex === -1) return;
 
-    // Procesamos la venta
-    venderProducto(producto.id, cantidad);
+    // 1. Ejecutamos la venta en el inventario
+    venderProducto(productoInventario.id, cantidad);
 
-    // Quitamos el producto del pedido
+    // 2. Quitamos SOLO el producto seleccionado de este pedido
+    // Usamos una comparación estricta para no borrar otros productos
     pedidos[pedidoIndex].productos = pedidos[pedidoIndex].productos.filter(
-        p => p.nombre !== nombre
+        item => item.nombre !== nombre
     );
 
-    // Si no quedan productos, borramos el pedido
+    // 3. SOLO si el pedido ya no tiene NINGÚN producto, eliminamos al cliente de la lista
     if (pedidos[pedidoIndex].productos.length === 0) {
         pedidos.splice(pedidoIndex, 1);
     }
 
-    actualizarTodo(); // Corregido: sin la "f"
+    actualizarTodo();
 };
 
+
+
+
 /* =========================
-DEJAR DEUDA (CORREGIDO)
+DEJAR DEUDA (CORREGIDO INDIVIDUAL)
 ========================= */
 window.dejarDeuda = function(pedidoId, nombre, cantidad) {
-    const producto = productos.find(
+    const productoInventario = productos.find(
         p => p.nombre.toLowerCase() === nombre.toLowerCase()
     );
 
-    if (!producto) return alert("Producto no existe en inventario");
+    if (!productoInventario) return alert("Producto no existe en inventario");
 
     const pedidoIndex = pedidos.findIndex(p => String(p.id) === String(pedidoId));
     if (pedidoIndex === -1) return;
 
-    const monto = producto.precio * cantidad;
+    // 1. Registramos la deuda con el precio de este producto
+    const monto = productoInventario.precio * cantidad;
     registrarDeuda(pedidos[pedidoIndex].cliente, monto);
 
-    // Quitamos el producto del pedido
+    // 2. Quitamos SOLO este producto del pedido
     pedidos[pedidoIndex].productos = pedidos[pedidoIndex].productos.filter(
-        p => p.nombre !== nombre
+        item => item.nombre !== nombre
     );
 
-    // Si no quedan productos, borramos el pedido
+    // 3. Si ya no quedan más productos en este pedido, borramos el pedido
     if (pedidos[pedidoIndex].productos.length === 0) {
         pedidos.splice(pedidoIndex, 1);
     }
