@@ -993,6 +993,7 @@ modoAdmin = !modoAdmin;
 if(modoAdmin){
 
 document.getElementById("reset-sistema").style.display="inline-block";
+document.getElementById("reiniciar-sistema").style.display="inline-block";
 alert("Modo administrador activado");
 
 }else{
