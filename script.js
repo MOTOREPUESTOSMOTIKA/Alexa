@@ -755,54 +755,51 @@ if(formDeuda){
 /* =========================
 ENTREGA DE PEDIDOS
 ========================= */
+function renderEntregarPedidos() {
+    const cont = document.getElementById("panel-entregar");
+    if (!cont) return;
 
-function renderEntregarPedidos(){
+    cont.innerHTML = "";
 
- const cont = document.getElementById("panel-entregar");
+    // Si no hay pedidos, mostrar un mensaje amigable
+    if (pedidos.length === 0) {
+        cont.innerHTML = "<p style='text-align:center; padding:20px; color:gray;'>No hay pedidos pendientes por entregar.</p>";
+        return;
+    }
 
- if(!cont) return;
+    (pedidos || []).forEach(p => {
+        // Caja blanca para cada cliente
+        let html = `<div class="pedido-entrega" style="border:1px solid #ddd; border-radius:10px; padding:12px; margin-bottom:15px; background:white; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">`;
+        
+        // Nombre del cliente en negrita
+        html += `<h3 style="margin:0 0 10px 0; color:#1e293b; border-bottom:2px solid #f1f5f9; padding-bottom:5px;">👤 ${p.cliente}</h3>`;
 
- cont.innerHTML = "";
+        (p.productos || []).forEach(prod => {
+            html += `
+            <div class="fila-pedido" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding:5px 0;">
+                
+                <span style="font-size:14px; font-weight:500; color:#334155;">${prod.nombre} (${prod.cantidad})</span>
+                
+                <div style="display:flex; gap:8px;">
+                    <button onclick="entregarProducto('${p.id}','${prod.nombre}',${prod.cantidad})" 
+                            style="background:#2563eb; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:11px;">
+                        ENTREGAR
+                    </button>
+                    
+                    <button onclick="dejarDeuda('${p.id}','${prod.nombre}',${prod.cantidad})" 
+                            style="background:#64748b; color:white; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:11px;">
+                        DEUDA
+                    </button>
+                </div>
+            </div>`;
+        });
 
- (pedidos || []).forEach(p=>{
-
- let html = `<div class="pedido-entrega">`;
-
- html += `<h3>${p.cliente}</h3>`;
-
-(p.productos || []).forEach(prod=>{
-
- html += `
-
- <div class="fila-pedido">
-
- ${prod.nombre} (${prod.cantidad})
-
-<button onclick="entregarProducto('${p.id}','${prod.nombre}',${prod.cantidad})">
- Entregar
-</button>
-
-<button onclick="dejarDeuda('${p.id}','${prod.nombre}',${prod.cantidad})">
- Deuda
-</button>
-
- </div>
-
- `;
-
- });
-
- html += `</div>`;
-
- cont.innerHTML += html;
-
- });
-
+        html += `</div>`;
+        cont.innerHTML += html;
+    });
 }
 
-/* =========================
-ENTREGAR PRODUCTO
-========================= */
+
 
 /* =========================
 ENTREGAR PRODUCTO (CORREGIDO)
@@ -1047,4 +1044,25 @@ window.reiniciarSistema = function(){
 
  location.reload();
 
+}
+/* =========================
+GUARDAR TODO (ASEGURAR REFRESCO)
+========================= */
+function actualizarTodo(){
+
+ db.ref("motika_data").set({
+  productos: productos,
+  transacciones: transacciones,
+  compras: compras,
+  pedidos: pedidos,
+  deudas: deudas,
+  historialReportes: historialReportes
+ }).then(() => {
+  // Esto fuerza a la interfaz a redibujarse 
+  // justo después de que Firebase confirme el guardado
+  renderTodo(); 
+ });
+
+ // También lo llamamos aquí por si el internet está lento
+ renderTodo(); 
 }
