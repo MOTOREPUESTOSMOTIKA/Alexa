@@ -48,7 +48,7 @@ function iniciarFirebase(){
 
  console.log("Firebase conectado");
 
- db.ref("motika_data").once("value").then(snap=>{
+ db.ref("motika_data").on("value", snap=>{
 
   console.log("Datos recibidos:", snap.val());
 
