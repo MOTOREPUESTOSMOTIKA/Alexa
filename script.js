@@ -533,36 +533,87 @@ function generarListaCompras(){
 /* =========================
 RENDER LISTA COMPRAS
 ========================= */
-
 function renderListaCompras(){
 
  const cont = document.getElementById("contenedor-lista-compras");
-
  if(!cont) return;
 
  const lista = generarListaCompras();
 
- let html = "";
+ let pendientes = "";
+ let comprados = "";
 
  Object.keys(lista).forEach(nombre=>{
 
-  html += `
+  const item = `
 
-  <div class="item-compra">
+  <label class="item-compra">
 
-  <input type="checkbox">
+  <input type="checkbox" onchange="marcarCompra(this)">
 
   ${nombre} (${lista[nombre]})
 
-  </div>
+  </label>
 
   `;
 
+  pendientes += item;
+
  });
 
- cont.innerHTML = html;
+ cont.innerHTML = `
+
+ <div class="grid-compras">
+
+ <div class="columna">
+ <h3>🛒 Falta comprar</h3>
+ <div id="pendientes">
+ ${pendientes}
+ </div>
+ </div>
+
+ <div class="columna">
+ <h3>✔ Comprado</h3>
+ <div id="comprados"></div>
+ </div>
+
+ </div>
+
+ <button onclick="limpiarComprados()" class="btn-limpiar">
+ Limpiar lista
+ </button>
+
+ `;
 
 }
+function marcarCompra(check){
+
+ const item = check.parentElement;
+
+ const comprados = document.getElementById("comprados");
+ const pendientes = document.getElementById("pendientes");
+
+ if(check.checked){
+
+  comprados.appendChild(item);
+
+ }else{
+
+  pendientes.appendChild(item);
+
+ }
+
+}
+function limpiarComprados(){
+
+ const comprados = document.getElementById("comprados");
+
+ if(!comprados) return;
+
+ comprados.innerHTML = "";
+
+}
+
 /* =========================
 REGISTRAR DEUDA
 ========================= */
