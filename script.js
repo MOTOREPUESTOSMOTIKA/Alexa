@@ -804,69 +804,66 @@ function renderEntregarPedidos(){
 ENTREGAR PRODUCTO
 ========================= */
 
-window.entregarProducto = function(pedidoId,nombre,cantidad){
+/* =========================
+ENTREGAR PRODUCTO (CORREGIDO)
+========================= */
+window.entregarProducto = function(pedidoId, nombre, cantidad) {
+    const producto = productos.find(
+        p => p.nombre.toLowerCase() === nombre.toLowerCase()
+    );
 
- const producto = productos.find(
-p=>p.nombre.toLowerCase() === nombre.toLowerCase()
-);
+    if (!producto) return alert("Producto no existe en inventario");
 
- if(!producto){
-  alert("Producto no existe en inventario");
-  return;
- }
+    if (producto.cantidad < cantidad) return alert("No hay suficiente stock");
 
- if(producto.cantidad < cantidad){
-  alert("No hay suficiente stock");
-  return;
- }
+    const pedidoIndex = pedidos.findIndex(p => String(p.id) === String(pedidoId));
+    if (pedidoIndex === -1) return;
 
- const pedido = pedidos.find(p=>String(p.id)===String(pedidoId));
+    // Procesamos la venta
+    venderProducto(producto.id, cantidad);
 
- if(!pedido) return;
+    // Quitamos el producto del pedido
+    pedidos[pedidoIndex].productos = pedidos[pedidoIndex].productos.filter(
+        p => p.nombre !== nombre
+    );
 
- venderProducto(producto.id,cantidad);
+    // Si no quedan productos, borramos el pedido
+    if (pedidos[pedidoIndex].productos.length === 0) {
+        pedidos.splice(pedidoIndex, 1);
+    }
 
- pedido.productos = pedido.productos.filter(
-  p=>p.nombre !== nombre
- );
+    actualizarTodo(); // Corregido: sin la "f"
+};
 
- if(pedido.productos.length === 0){
-  pedidos = pedidos.filter(p=>p.id !== pedidoId);
- }
+/* =========================
+DEJAR DEUDA (CORREGIDO)
+========================= */
+window.dejarDeuda = function(pedidoId, nombre, cantidad) {
+    const producto = productos.find(
+        p => p.nombre.toLowerCase() === nombre.toLowerCase()
+    );
 
- actualizarTodo();
+    if (!producto) return alert("Producto no existe en inventario");
 
-}
-window.dejarDeuda = function(pedidoId,nombre,cantidad){
+    const pedidoIndex = pedidos.findIndex(p => String(p.id) === String(pedidoId));
+    if (pedidoIndex === -1) return;
 
- const producto = productos.find(
-p=>p.nombre.toLowerCase() === nombre.toLowerCase()
-);
+    const monto = producto.precio * cantidad;
+    registrarDeuda(pedidos[pedidoIndex].cliente, monto);
 
- if(!producto){
-  alert("Producto no existe en inventario");
-  return;
- }
+    // Quitamos el producto del pedido
+    pedidos[pedidoIndex].productos = pedidos[pedidoIndex].productos.filter(
+        p => p.nombre !== nombre
+    );
 
- const pedido = pedidos.find(p=>String(p.id)===String(pedidoId));
+    // Si no quedan productos, borramos el pedido
+    if (pedidos[pedidoIndex].productos.length === 0) {
+        pedidos.splice(pedidoIndex, 1);
+    }
 
- if(!pedido) return;
+    actualizarTodo();
+};
 
- const monto = producto.precio * cantidad;
-
- registrarDeuda(pedido.cliente,monto);
-
- pedido.productos = pedido.productos.filter(
-  p=>p.nombre !== nombre
- );
-
- if(pedido.productos.length === 0){
-  pedidos = pedidos.filter(p=>p.id !== pedidoId);
- }
-
- actualizarTodo();
-
-}
 /* =========================
 RENDER GENERAL
 ========================= */
