@@ -955,8 +955,8 @@ alert("Sistema reiniciado");
 /* =========================
 MODO ADMIN (BOTON SECRETO)
 ========================= */
-
 let presionTimer;
+let modoAdmin = false;
 
 const botonLuna = document.getElementById("modo-oscuro");
 
@@ -964,8 +964,19 @@ botonLuna.addEventListener("touchstart",()=>{
 
 presionTimer = setTimeout(()=>{
 
+modoAdmin = !modoAdmin;
+
+if(modoAdmin){
+
 document.getElementById("reset-sistema").style.display="inline-block";
 alert("Modo administrador activado");
+
+}else{
+
+document.getElementById("reset-sistema").style.display="none";
+alert("Modo administrador desactivado");
+
+}
 
 },3000);
 
@@ -974,19 +985,3 @@ alert("Modo administrador activado");
 botonLuna.addEventListener("touchend",()=>{
 clearTimeout(presionTimer);
 });
-
-/* =========================
-RESET SISTEMA
-========================= */
-
-function resetSistema(){
-
-if(!confirm("¿Seguro que quieres borrar TODO el sistema?")) return;
-
-db.ref().remove();
-
-alert("Sistema reiniciado");
-
-location.reload();
-
-}
