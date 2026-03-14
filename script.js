@@ -999,6 +999,8 @@ alert("Modo administrador activado");
 }else{
 
 document.getElementById("reset-sistema").style.display="none";
+document.getElementById("reiniciar-sistema").style.display="none";
+
 alert("Modo administrador desactivado");
 
 }
@@ -1010,6 +1012,7 @@ alert("Modo administrador desactivado");
 botonLuna.addEventListener("touchend",()=>{
 clearTimeout(presionTimer);
 });
+
 window.resetSistema = function(){
 
  if(!confirm("Esto borrará TODOS los datos del sistema")) return;
@@ -1022,8 +1025,8 @@ window.resetSistema = function(){
   pedidos: [],
   deudas: [],
   historialReportes: []
-  
-  }).then(()=>{
+
+ }).then(()=>{
 
   productos = [];
   transacciones = [];
@@ -1032,11 +1035,14 @@ window.resetSistema = function(){
   deudas = [];
   historialReportes = [];
 
+  renderTodo();
+
+  alert("Sistema reiniciado");
+
  });
 
- alert("Sistema reiniciado");
-
 }
+
 window.reiniciarSistema = function(){
 
  if(!confirm("Reiniciar sistema sin borrar datos?")) return;
