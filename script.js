@@ -1009,3 +1009,28 @@ alert("Modo administrador desactivado");
 botonLuna.addEventListener("touchend",()=>{
 clearTimeout(presionTimer);
 });
+window.resetSistema = function(){
+
+ if(!confirm("Esto borrará TODOS los datos del sistema")) return;
+
+ db.ref("motika_data").set({
+
+  productos: [],
+  transacciones: [],
+  compras: [],
+  pedidos: [],
+  deudas: [],
+  historialReportes: []
+
+ });
+
+ alert("Sistema reiniciado");
+
+}
+window.reiniciarSistema = function(){
+
+ if(!confirm("Reiniciar sistema sin borrar datos?")) return;
+
+ location.reload();
+
+}
