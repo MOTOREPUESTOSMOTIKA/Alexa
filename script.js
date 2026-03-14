@@ -781,68 +781,69 @@ function renderEntregarPedidos() {
 }
 
 /* =========================
-ENTREGAR PRODUCTO (CORREGIDO INDIVIDUAL)
+ENTREGAR PRODUCTO (SOLUCIÓN DEFINITIVA)
 ========================= */
-window.entregarProducto = function(pedidoId, nombre, cantidad) {
-    const productoInventario = productos.find(
-        p => p.nombre.toLowerCase() === nombre.toLowerCase()
-    );
+window.entregarProducto = function(pedidoId, nombreProducto, cantidad) {
+    // 1. Buscar el producto en el inventario
+    const productoInv = productos.find(p => p.nombre.toLowerCase() === nombreProducto.toLowerCase());
+    
+    if (!productoInv) return alert("Producto no existe en inventario");
+    if (productoInv.cantidad < cantidad) return alert("No hay suficiente stock");
 
-    if (!productoInventario) return alert("Producto no existe en inventario");
-    if (productoInventario.cantidad < cantidad) return alert("No hay suficiente stock");
-
+    // 2. Buscar el pedido del cliente
     const pedidoIndex = pedidos.findIndex(p => String(p.id) === String(pedidoId));
     if (pedidoIndex === -1) return;
 
-    // 1. Ejecutamos la venta en el inventario
-    venderProducto(productoInventario.id, cantidad);
+    // 3. Procesar la venta (Descontar stock y registrar transacción)
+    venderProducto(productoInv.id, cantidad);
 
-    // 2. Quitamos SOLO el producto seleccionado de este pedido
-    // Usamos una comparación estricta para no borrar otros productos
-    pedidos[pedidoIndex].productos = pedidos[pedidoIndex].productos.filter(
-        item => item.nombre !== nombre
-    );
+    // 4. ELIMINAR SOLO ESTE PRODUCTO DEL PEDIDO
+    // Filtramos para mantener todos los productos EXCEPTO el que acabamos de entregar
+    pedidos[pedidoIndex].productos = pedidos[pedidoIndex].productos.filter(prod => {
+        return prod.nombre !== nombreProducto;
+    });
 
-    // 3. SOLO si el pedido ya no tiene NINGÚN producto, eliminamos al cliente de la lista
+    // 5. SI EL PEDIDO YA NO TIENE NADA, ELIMINAR AL CLIENTE
     if (pedidos[pedidoIndex].productos.length === 0) {
         pedidos.splice(pedidoIndex, 1);
     }
 
+    // 6. Guardar y refrescar
     actualizarTodo();
 };
-
-
-
 
 /* =========================
-DEJAR DEUDA (CORREGIDO INDIVIDUAL)
+DEJAR DEUDA (SOLUCIÓN DEFINITIVA)
 ========================= */
-window.dejarDeuda = function(pedidoId, nombre, cantidad) {
-    const productoInventario = productos.find(
-        p => p.nombre.toLowerCase() === nombre.toLowerCase()
-    );
+window.dejarDeuda = function(pedidoId, nombreProducto, cantidad) {
+    // 1. Buscar precio en inventario
+    const productoInv = productos.find(p => p.nombre.toLowerCase() === nombreProducto.toLowerCase());
+    if (!productoInv) return alert("Producto no existe en inventario");
 
-    if (!productoInventario) return alert("Producto no existe en inventario");
-
+    // 2. Buscar pedido
     const pedidoIndex = pedidos.findIndex(p => String(p.id) === String(pedidoId));
     if (pedidoIndex === -1) return;
 
-    // 1. Registramos la deuda con el precio de este producto
-    const monto = productoInventario.precio * cantidad;
-    registrarDeuda(pedidos[pedidoIndex].cliente, monto);
+    // 3. Registrar la deuda solo por este producto
+    const montoDeuda = productoInv.precio * cantidad;
+    registrarDeuda(pedidos[pedidoIndex].cliente, montoDeuda);
 
-    // 2. Quitamos SOLO este producto del pedido
-    pedidos[pedidoIndex].productos = pedidos[pedidoIndex].productos.filter(
-        item => item.nombre !== nombre
-    );
+    // 4. QUITAR SOLO ESTE PRODUCTO DEL PEDIDO
+    pedidos[pedidoIndex].productos = pedidos[pedidoIndex].productos.filter(prod => {
+        return prod.nombre !== nombreProducto;
+    });
 
-    // 3. Si ya no quedan más productos en este pedido, borramos el pedido
+    // 5. Si no quedan más cosas, eliminar pedido
     if (pedidos[pedidoIndex].productos.length === 0) {
         pedidos.splice(pedidoIndex, 1);
     }
 
     actualizarTodo();
 };
+
+
+
+
 
 /* =========================
 RENDER GENERAL
